@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-row :gutter="20">
+    <el-row :gutter=20>
       <!--部门数据-->
       <el-col :span="4" :xs="24">
         <div class="head-container">
@@ -82,7 +82,7 @@
           </el-form-item>
         </el-form>
 
-        <el-row :gutter="10" class="mb8">
+        <el-row :gutter=10 class="mb8">
           <el-col :span="1.5">
             <el-button
               type="primary"

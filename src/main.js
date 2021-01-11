@@ -7,6 +7,8 @@ import 'normalize.css/normalize.css' // a modern alternative to CSS resets
 import Element from 'element-ui'
 import './assets/styles/element-variables.scss'
 
+import EleForm from 'vue-ele-form'
+
 import '@/assets/styles/index.scss' // global css
 import '@/assets/styles/ruoyi.scss' // ruoyi css
 import App from './App'
@@ -60,8 +62,10 @@ Vue.use(permission)
  */
 
 Vue.use(Element, {
-  size: Cookies.get('size') || 'medium' // set element-ui default size
+  size: Cookies.get('size') || 'small' // set element-ui default size
 })
+
+Vue.use(EleForm)
 
 Vue.config.productionTip = false
 

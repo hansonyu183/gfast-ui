@@ -9,7 +9,7 @@
       @open="onOpen"
       @close="onClose"
     >
-      <el-row :gutter="15">
+      <el-row :gutter=15>
         <el-form
           ref="elForm"
           :model="formData"
