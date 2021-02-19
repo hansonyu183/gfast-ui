@@ -164,7 +164,7 @@ import {
   goBackVou,
   goNextVou,
   exportVou,
-} from "@/api/module/voucher";
+} from "@/api/erp/voucher";
 
 export default {
   name: "VouDialog",

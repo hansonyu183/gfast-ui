@@ -92,7 +92,7 @@
 
 <script>
 import ErpVou from "./erpVou";
-import { getListByName,delListByNameIds } from "@/api/module/list";
+import { getListByName,delListByNameIds } from "@/api/erp/list";
 export default {
   name: "ErpList",
   components: {

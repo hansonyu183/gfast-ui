@@ -134,9 +134,9 @@ import {
   addEba,
   updateEba,
   exportEba,
-} from "@/api/module/eba";
+} from "@/api/erp/eba";
 import EbaVou from "./vou";
-import VouDialog from "../voucher/vouDialog";
+import VouDialog from "@/components/erp/vouDialog";
 export default {
   name: "EbaList",
   components: {

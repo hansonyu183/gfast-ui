@@ -7,8 +7,6 @@ import 'normalize.css/normalize.css' // a modern alternative to CSS resets
 import Element from 'element-ui'
 import './assets/styles/element-variables.scss'
 
-import EleForm from 'vue-ele-form'
-
 import '@/assets/styles/index.scss' // global css
 import '@/assets/styles/ruoyi.scss' // ruoyi css
 import App from './App'
@@ -22,7 +20,7 @@ import { getDicts } from "@/api/system/dict/data";
 import { getConfigKey } from "@/api/system/config";
 import { parseTime, resetForm, addDateRange, selectDictLabel, download, handleTree } from "@/utils/ruoyi";
 import Pagination from "@/components/Pagination";
-
+import 'xe-utils'
 
 // 全局方法挂载
 Vue.prototype.getDicts = getDicts
@@ -65,7 +63,6 @@ Vue.use(Element, {
   size: Cookies.get('size') || 'small' // set element-ui default size
 })
 
-Vue.use(EleForm)
 
 Vue.config.productionTip = false
 
@@ -73,5 +70,13 @@ new Vue({
   el: '#app',
   router,
   store,
-  render: h => h(App)
+  render: h => h(App),
+  created: async function () {
+    await this.$store.dispatch('doc/loadALLDoc', 'ALL')
+      .catch(() => {
+      });
+    await this.$store.dispatch('desc/loadLabel').catch(() => { })
+    await this.$store.dispatch('desc/loadUser', 'admin').catch(() => { })
+
+  }
 })

@@ -163,7 +163,7 @@ import {
   goBackVou,
   goNextVou,
   exportVou,
-} from "@/api/module/vou";
+} from "@/api/erp/vou";
 
 export default {
   name: "ErpVou",

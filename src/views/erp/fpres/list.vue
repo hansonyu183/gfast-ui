@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import ErpList from "../components/erpList";
+import ErpList from "@/components/erp/erpList";
 export default {
   name: "FpresList",
   components: {
