@@ -1,25 +1,22 @@
 import { getDocOption } from '@/api/erp/doc'
 
 const state = {
-    eba: [{
-        id: '',
-        no: '',
-        name: '',
-        py: '',
-    }],
-    sup: [],
-    company: [],
-    res: [],
-    emp: [],
-    account: [],
-    subject: [],
-    vtype: [],
-    unit: [],
-    brand: [],
-    reskind: [],
-    vstate: [],
-    dstate: [],
-    user:[]
+    /*  eba: [],
+      sup: [],
+      company: [],
+      res: [],
+      emp: [],
+      account: [],
+      subject: [],
+      vtype: [],
+      unit: [],
+      brand: [],
+      reskind: [],
+      state: [],
+      act: [],
+      user: [],
+      ebasq: [],
+      invres: [],*/
 }
 
 const mutations = {
@@ -47,6 +44,12 @@ const mutations = {
         state.vtype = data
     },
     SET_ALL: (state, data) => {
+        for (const key in data) {
+            if (Object.hasOwnProperty.call(data, key)) {
+                const element = data[key];
+                state[key] = element
+            }
+        }/*
         state.eba = data.eba
         state.sup = data.sup
         state.res = data.res
@@ -57,10 +60,12 @@ const mutations = {
         state.company = [...state.eba, ...state.sup]
         state.brand = data.brand
         state.reskind = data.reskind
-        state.vstate = data.vstate
-        state.dstate = data.dstate
+        state.state = data.state
+        state.act = data.act
         state.unit = data.unit
         state.user = data.user
+        state.ebasq = data.ebasq
+        state.invres = data.invres*/
     },
 }
 
@@ -78,6 +83,9 @@ const actions = {
     },
 }
 
+/*
+
+*/
 
 export default {
     namespaced: true,

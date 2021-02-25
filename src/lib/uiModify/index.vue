@@ -60,6 +60,7 @@ export default {
     onJsonChange(value) {},
     onJsonSave(value) {
       this.$store.dispatch('desc/saveUserDesc', value)
+      this.$store.dispatch('desc/makeLabel', value)
     },
     onError(value) {
       console.log('value:', value)

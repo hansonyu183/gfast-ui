@@ -51,15 +51,10 @@ const state = {
       }//page:ebaList
     ],*/
   },
+  tables: {
 
+  },
   label: {
-    id: '编号',
-    res_id: '产品',
-    name: '名称',
-    amo: '金额',
-    num: '数量',
-    price: '价格',
-    address: '地址'
   },
 
   autoItem: {
@@ -68,7 +63,7 @@ const state = {
       label: 'ID',
     },
     name: {
-      type: 'string',
+      type: 'name',
       label: '名称',
     },
     date: {
@@ -88,7 +83,7 @@ const state = {
       label: '备注',
     },
     num: {
-      type: 'number',
+      type: 'num',
       label: '数量',
     },
     amo: {
@@ -127,7 +122,9 @@ const mutations = {
     state.autoItem = desc
   },
   SET_LABEL: (state, desc) => {
-    state.user = desc
+    if (desc) {
+      state.label = desc
+    }
   },
   SET_USER: (state, desc) => {
     state.user = desc
@@ -146,11 +143,15 @@ const mutations = {
   SWITCH_CAN_MODIFY_UI: (state) => {
     state.canModifyUI = !state.canModifyUI
   },
-  SAVE_LABEL: (state, key, label) => {
+  SAVE_LABEL_BY_KEY: (state, key, label) => {
     state.label[key] = label
   },
   SAVE_USER_PAGE: (state, desc) => {
+    if (!state.user.pages) {
+      state.user['pages'] = [s]
+    }
     const i = state.user.pages.findIndex((obj) => obj.name === desc.name)
+
     if (i === -1) {
       state.user.pages.push(desc)
     } else {
@@ -175,7 +176,6 @@ const actions = {
     return new Promise((resolve, reject) => {
       getDesc(userName).then(res => {
         let desc = JSON.parse(res.data.data)
-        console.log(desc)
         commit('SET_USER', desc)//fillDesc(desc, state.autoItem, state.label)
         resolve(res)
       }).catch(error => {
@@ -183,8 +183,12 @@ const actions = {
       })
     })
   },
-  saveLabel({ commit }, key, label) {
-    commit('SAVE_LABEL', key, label)
+
+  makeLabel({ commit }, desc) {
+    commit('SET_LABEL', mkLabel(state.label, desc))
+  },
+  saveLabelByKey({ commit }, key, label) {
+    commit('SAVE_LABEL_BY_KEY', key, label)
   },
   switchCanModifyUI({ commit }) {
     commit('SWITCH_CAN_MODIFY_UI')
@@ -196,7 +200,7 @@ const actions = {
     commit('SET_USER', desc)
   },
 }
-
+/*
 function fillDesc(desc, itemDesc, labelDesc) {
   let ud = desc
   fillItems(ud, itemDesc, labelDesc)
@@ -221,6 +225,26 @@ function fillItems(desc, itemDesc, labelDesc) {
         }
       }
       fillItems(desc[t], itemDesc, labelDesc);
+    }
+  }
+}*/
+
+function mkLabel(labelDesc, desc) {
+  let lb = labelDesc
+  loopLabel(lb, desc)
+  return lb
+}
+
+function loopLabel(labelDesc, desc) {
+  for (const t in desc) {
+    const tp = Object.prototype.toString.call(desc[t])
+    if (tp === '[object Array]') {
+      mkLabel(labelDesc, desc[t]);
+    } else if (tp === '[object Object]') {
+      if (!labelDesc[desc[t].name] && desc[t].label) {
+        labelDesc[desc[t].name] = desc[t].label
+      }
+      mkLabel(labelDesc, desc[t]);
     }
   }
 }

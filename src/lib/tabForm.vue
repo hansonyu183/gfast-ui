@@ -4,7 +4,7 @@
       <el-tab-pane v-for="(v, i) in desc" :key="i" :label="v.label" :name="v.name"> </el-tab-pane>
     </el-tabs>
     <div v-for="(v, i) in desc" :key="i">
-      <erp-form
+      <edit-form
         v-if="value"
         v-show="activeName"
         :readOnly="readOnly"
@@ -23,10 +23,10 @@
     <el-button icon="el-icon-refresh" @click="handleReset">重置</el-button>
 
 */
-import ErpForm from './erpForm'
+import EditForm from './editForm'
 export default {
   name: 'TabForm',
-  components: { ErpForm },
+  components: { EditForm },
   props: {
     desc: {
       type: Array,
@@ -40,36 +40,47 @@ export default {
     },
     value: {
       type: Object,
-      request: true
+      request: true,
+      default: function () {
+        let formsData = {}
+        for (const el of this.desc) {
+          if (!formsData[el.name]) {
+            formsData[el.name] = {}
+            for (const it of el.items) {
+              formsData[el.name][it.name] = undefined
+            }
+          }
+        }
+        return formsData
+      }
     },
     readOnly: {
       type: Boolean,
       default: false
-    },
-    type: 'search'
+    }
   },
   data() {
     return {
       activeName: this.desc[0]?.name ?? '0'
     }
   },
-  computed: {
-    primaryLabel() {
-      return this.type === 'search' ? '搜索' : '保存'
-    }
-  },
+  computed: {},
   watch: {},
   methods: {
     setDefaultValue() {
-      const formData = { ...this.value }
+      let formData = { ...this.value }
       // 设置默认值
       for (const el of this.desc) {
-        if (formData[el.name] === undefined || formData[el.name] === null) {
-          formData[el.name] = undefined
+        if (!formData[el.name]) {
+          formData[el.name] = {}
+          for (const it of el.items) {
+            formData[el.name][it] = 1
+          }
         }
       }
       this.$emit('input', formData)
     },
+
     refreshForm() {
       this.resetForm('form')
     },
@@ -84,7 +95,7 @@ export default {
   },
   created() {},
   mounted() {
-    this.setDefaultValue()
+    // this.setDefaultValue()
   }
 }
 </script>

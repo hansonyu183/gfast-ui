@@ -1,5 +1,6 @@
 <template>
   <el-select
+    ref="elselect"
     filterable
     clearable
     default-first-option
@@ -8,12 +9,8 @@
     v-bind="$attrs"
     v-on="$listeners"
   >
-    <el-option
-      v-for="item in options"
-      :key="item.id"
-      :label="item.no + ':' + item.name"
-      :value="item.id"
-    >
+    <el-option v-for="item in options" :key="item.id" :label="item.name" :value="item.id
+    ">
     </el-option>
   </el-select>
 </template>
@@ -26,7 +23,7 @@ export default {
     prop: {
       type: String,
       required: true
-    },
+    }
   },
   data() {
     return {
@@ -44,10 +41,10 @@ export default {
   created() {
     let dicName = this.prop.slice(0, -3)
     const idx = dicName.lastIndexOf('_')
-    if (idx !== -1 ){
-     dicName = dicName.substr(idx+1)
+    if (idx !== -1) {
+      dicName = dicName.substr(idx + 1)
     }
-    this.docOption =[... this.getDoc(dicName)]
+    this.docOption = [...this.getDoc(dicName)]
   },
   methods: {
     filterOption(query) {
@@ -68,7 +65,18 @@ export default {
     }
   },
   mounted() {
-    this.options = this.docOption?.slice(0, 10)
+    const idx = this.docOption.findIndex((obj) => obj.id === this.$attrs.value)
+    if (idx === -1) {
+      this.options = this.docOption?.slice(0, 10)
+      return
+    }
+    const len = this.docOption.length
+    if (len >= 10) {
+      const begIdx = idx + 10 < len ? idx : Math.max(len - 10, 0)
+      this.options = this.docOption?.slice(begIdx, begIdx + 10)
+    } else {
+      this.options = this.docOption
+    }
   }
 }
 </script>

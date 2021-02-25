@@ -1,10 +1,23 @@
 <template>
   <div class="app-container">
-    <doc-act v-bind="$attrs" v-on="$listeners" @action="onAction" />
-    <tab-form v-if="desc.forms" :desc="desc.forms" v-model="forms" :readOnly="readOnly" />
+    <doc-act
+      v-bind="$attrs"
+      v-on="$listeners"
+      @action="onAction"
+      :id.sync="id"
+      :nextId="nextId"
+      :preId="preId"
+      :stateId="stateId"
+    />
+    <edit-form
+      ref="form"
+      v-if="desc ? desc.form : false"
+      :desc="desc.form"
+      v-model="form"
+      :readOnly="readOnly"
+    />
     <tab-table
-      v-if="desc.tables"
-      ref="erpTable"
+      v-if="desc ? desc.tables : false"
       :desc="desc.tables"
       :value="tables"
       :readOnly="readOnly"
@@ -15,129 +28,149 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { getDoc } from '@/api/erp/doc'
+import { getDoc, saveDoc, delDoc, docAction } from '@/api/erp/doc'
+import PY from '@/utils/c2py.js'
+
 import TabTable from '@/lib/tabTable.vue'
-import TabForm from '@/lib/tabForm.vue'
+import EditForm from '@/lib/editForm.vue'
 import DocAct from '@/lib/docAct.vue'
 export default {
   name: 'DocEditor',
   components: {
-    TabForm,
+    EditForm,
     TabTable,
     DocAct
   },
   props: {
-    pageName: '',
-    docName: '',
-    docId: 0
+    desc: {},
+    dataType: '',
+    dataId: 0
   },
   data() {
     return {
-      desc: {},
-      // 遮罩层
-      loading: true,
+      //  desc: undefined,
       //form数据
-      forms: {},
+      form: {},
       //table数据
       tables: {},
-      dId: this.docId,
+      id: this.dataId,
+      nextId: 0,
+      preId: 0
     }
   },
   computed: {
-    // 使用对象展开运算符将 getter 混入 computed 对象中
-    ...mapGetters([
-      'getPageDescByValue',
-      'dState'
+    ...mapGetters({
+      stateStore: 'state'
       // ...
-    ]),
-    readOnly() {
-      const sid = this.forms[this.docName]?.dstate_id
-      return 1 === this.dState.find((obj) => obj.id == sid)?.read_only
+    }),
+    stateId: {
+      get: function () {
+        return this.form?.state_id ?? 0
+      }
     },
+    readOnly: {
+      // getter
+      get: function () {
+        return 1 === this.stateStore.find((obj) => obj.id === this.stateId)?.read_only
+      }
+    },
+    name: {
+      get: function () {
+        return this.form?.name
+      }
+    }
   },
-  watch: {},
+  watch: {
+    dataId: {
+      handler(nval) {
+        this.id = nval
+      }
+    },
+    id: {
+      handler() {
+        this.getData()
+      },
+      immediate: true
+    },
+    name: {
+      handler(newVal) {
+        if (!this.readOnly) {
+          this.form.py = PY.chineseToPinYin(newVal)
+        }
+      }
+    }
+  },
   created() {
-    this.loading = true
-    this.getData(this.docId)
-    //this.initForm()
-    this.loading = false
+    this.getData()
   },
   mounted() {},
   methods: {
-    /** 初始化Form和表格*/
-    initForm() {
-      this.desc = this.getPageDesc(this.pageName)
-      for (const k in this.desc.forms) {
-        //this.formData[k.name] = undefined
-      }
-    },
     /** 查询明细数据 */
-    getData(docId) {
-      getDoc(this.docName, docId).then((response) => {
-        this.forms = response.data.forms
+    getData() {
+      getDoc(this.dataType, this.id).then((response) => {
+        this.nextId = response.data.nextId
+        this.preId = response.data.preId
+        this.form = response.data.form
         this.tables = response.data.tables
-        const pageData = {
-          name: this.pageName,
-          forms: response.data.forms,
-          tables: response.data.tables
-        }
-        this.desc = this.getPageDescByValue(this.pageName, pageData)
-        this.$store.dispatch('desc/saveUserPageDesc', this.desc)
       })
     },
-
-    onAction(act, docId) {
-      // this.vouState = 'f'
+    saveData() {
+      saveDoc(this.dataType, this.id, { form: this.form, tables: this.tables }).then((response) => {
+        if (response.code === 200) {
+          this.id = response.data
+          this.msgSuccess('保存成功')
+          this.getData()
+        } else {
+          this.msgError(response.msg)
+        }
+      })
+    },
+    delData() {
+      delDoc(this.dataType, this.id).then((response) => {
+        if (response.code === 200) {
+          this.msgSuccess('删除成功')
+        } else {
+          this.msgError(response.msg)
+        }
+      })
+    },
+    docAction(act) {
+      docAction(this.dataType, this.id, act, { form: this.form, tables: this.tables }).then(
+        (response) => {
+          if (response.code === 200) {
+            this.id = response.data
+            this.msgSuccess('操作成功')
+            this.getData()
+          } else {
+            this.msgError(response.msg)
+          }
+        }
+      )
+    },
+    onAction(act) {
       switch (act) {
+        case 'add':
+          this.getData()
+          break
         case 'pre':
-          this.dId = docId
-          this.getData(docId)
+          this.getData()
           break
         case 'next':
-          this.dId = docId
-          this.getData(docId)
+          this.getData()
           break
-        case 'add':
-          this.dId = docId
-          for (const key in this.tables) {
-            this.tables[key] = []
-          }
-          for (const key in this.forms) {
-            this.forms[key] = {}
+        case 'print':
+          break
+        case 'save':
+          if (this.$refs.form.valid()) {
+            this.docAction(act)
+          } else {
+            this.msgError('数据有误，请核查！')
           }
           break
         default:
+          this.docAction(act)
           break
       }
-    },
-    /** 刷新明细页 */
-    refreshPage() {
-      this.loading = true
-      // this.getData()
-      this.loading = false
-    },
-    /** 刷新表格 */
-    refreshTable() {
-      this.pageNum = 1
-      this.getData()
-    },
-    /** 搜索按钮操作 */
-    handleSubmit(value) {
-      this.loading = true
-      this.formData = value
-      this.refreshTable()
-      this.loading = false
-    },
-    handleReset() {
-      //this.$refs.erpForm.refreshForm()
-      this.handleSubmit()
-    },
-    /** 双击打开编辑弹窗 */
-    handleVouClose() {
-      this.vouVisible = false
-      this.loading = true
-      this.refreshTable()
-      this.loading = false
     }
   }
 }

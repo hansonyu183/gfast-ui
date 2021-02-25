@@ -23,15 +23,25 @@
     v-bind="$attrs"
     v-on="$listeners"
   />
+
   <el-input v-else v-bind="$attrs" v-on="$listeners" />
 </template>
 
 <script>
-import DocSelect from './docSelect'
+/*
+  <num-input
+    v-else-if="itemDesc.type === 'num'"
+    :point="2"
+    placeholder="请输入数量"
+    v-model.number="$attrs.value"
+  ></num-input>*/
+import DocSelect from './input/docSelect'
+import NumInput from './input/numInput'
 export default {
   name: 'ErpInput',
   components: {
-    DocSelect
+    DocSelect,
+    NumInput
   },
   props: {
     itemDesc: {
@@ -43,21 +53,11 @@ export default {
           label: 'item',
           type: 'string'
         }
-      },
-      readOnly: false
-    }
+      }
+    },
   },
   data() {
-    return {
-      checkOption: this.$attrs.value,
-      itemRules: {
-        dict: [],
-        date: [],
-        month: [],
-        dateRange: [],
-        monthRange: []
-      }
-    }
+    return {}
   }
 }
 </script>

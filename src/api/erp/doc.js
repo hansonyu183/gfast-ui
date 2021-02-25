@@ -19,9 +19,9 @@ export function getDocOption(docName) {
 }
 
 // 查询数据
-export function delDoc(body) {
+export function delDoc(docType, id) {
   return request({
-    url: '/erp/docList/' + docName + '/' + body,
+    url: `/erp/doc/${docType}/${id}`,
     method: 'delete',
   })
 }
@@ -31,5 +31,23 @@ export function getDoc(docType, id) {
   return request({
     url: `/erp/doc/${docType}/${id}`,
     method: 'get',
+  })
+}
+
+//保存数据
+export function saveDoc(docType, id, data) {
+  return request({
+    url: `/erp/doc/${docType}/${id}`,
+    method: 'post',
+    params: data
+  })
+}
+
+//保存数据
+export function docAction(docType, id, act, data) {
+  return request({
+    url: `/erp/docAct/${docType}/${id}/${act}`,
+    method: 'post',
+    params: data
   })
 }

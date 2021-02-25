@@ -1,39 +1,35 @@
 <template>
-  <el-form ref="erpform" label-width="80px" :model="value" :inline="true">
+  <el-form v-if="desc" ref="qyeryForm" label-width="80px" :model="value" :inline="true">
     <el-form-item
       v-for="item in items"
       :key="item.name"
       :prop="item.name"
       :label="item.label"
-      :show-message="true"
       label-width="auto"
     >
-      <erp-input
-        v-if="value"
-        :disabled="item.readOnly ? item.readOnly && readOnly : readOnly"
-        v-bind="item.attrs"
-        :itemDesc="item"
-        v-model="value[item.name]"
-      />
+      <erp-input v-if="value" v-bind="item.attrs" :itemDesc="item" v-model="value[item.name]" />
     </el-form-item>
+    <el-button icon="el-icon-refresh" @click="handleReset">重置</el-button>
   </el-form>
 </template>
 
 <script>
 import ErpInput from './erpInput'
+import ErpLabel from './erpLabel'
 export default {
-  name: 'ErpForm',
-  components: { ErpInput },
+  name: 'QueryForm',
+  components: { ErpInput, ErpLabel },
   props: {
     desc: {
       type: Object,
       request: true,
-      default: [
-        {
+      default: function () {
+        return {
           name: 'form',
-          label: 'form'
+          label: 'form',
+          items: []
         }
-      ]
+      }
     },
     value: {
       type: Object,
@@ -50,19 +46,11 @@ export default {
         }
         return formData
       }
-    },
-    readOnly: {
-      type: Boolean,
-      default: false
     }
   },
   data() {
     return {
-      items: this.desc?.items ? [...this.desc.items] : [],
-      rules: {
-        name: [{ required: true, message: '名称不能为空' }],
-        no: [{ required: true, message: '编号不能为空' }]
-      }
+      items: this.desc?.items ? [...this.desc.items] : []
     }
   },
   computed: {},
@@ -77,6 +65,14 @@ export default {
         }
       }
       this.$emit('input', formData)
+    },
+    /** 搜索按钮操作 */
+    handleSubmit() {
+      this.$emit('submit', this.value)
+    },
+    handleReset() {
+      this.resetForm('qyeryForm')
+      this.$emit('reset')
     }
   },
   created() {},

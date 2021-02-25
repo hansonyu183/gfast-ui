@@ -1,22 +1,20 @@
 <template>
   <div class="app-container">
-    <tab-form v-if="desc.forms" :desc="desc.forms" v-model="forms" />
-    <tab-table
-      v-if="desc.tables"
-      ref="erpTable"
-      :desc="desc.tables"
-      :value="tables"
-      @row-dbclick="onRowDbClick"
-    >
-    </tab-table>
-
-    <el-dialog title="资料编辑" width="80%" :visible.sync="ediorVisible">
+    <query-form v-if="descForm" :desc="descForm" v-model="form" />
+    <erp-List
+      v-if="descList && list"
+      :ref="dataType + 'List'"
+      :desc="descList"
+      :value="list"
+      :filters="form"
+      @row-dblclick="onRowDbClick"
+    />
+    <el-dialog v-if="dbClickId" title="资料编辑" width="80%" :visible.sync="ediorVisible">
       <doc-editor
-        :docName="docName"
-        :pageName="docName+'Editor'"
-        :docId="docId"
-        :list="dbClickList"
-        :listIndex="dbClickIndex"
+        :dataType="dataType"
+        :pageName="dataType + 'Editor'"
+        :desc="descEditor"
+        :dataId="dbClickId"
       >
         ></doc-editor
       >
@@ -27,33 +25,35 @@
 <script>
 import { mapGetters } from 'vuex'
 import { getDocList } from '@/api/erp/doc'
-import TabTable from '@/lib/tabTable.vue'
-import TabForm from '@/lib/tabForm.vue'
+import ErpList from '@/lib/erpList.vue'
+import QueryForm from '@/lib/queryForm.vue'
 import DocEditor from './docEditor.vue'
 export default {
   name: 'DocList',
   components: {
-    TabForm,
-    TabTable,
+    QueryForm,
+    ErpList,
     DocEditor
   },
   props: {
-    docName: '',
-    pageName: ''
+    dataType: '',
+    pageName: '',
+    pageDesc: {}
   },
   data() {
     return {
-      desc: {},
+      descForm: this.pageDesc.form,
+      descList: this.pageDesc.tables[0],
+      descEditor: this.pageDesc.editor,
       // 遮罩层
       loading: true,
-      tables: {},
+      list: undefined,
       //form数据
-      forms: {
+      form: {
         // 页面参数
       },
       // 是否显示弹出层
-      dbClickList: [],
-      dbClickIndex: 0,
+      dbClickId: 0,
       ediorVisible: false
     }
   },
@@ -64,10 +64,7 @@ export default {
       'getPageDescByValue'
 
       // ...
-    ]),
-    docId() {
-      return this.dbClickList[this.dbClickIndex]?.id ?? 0
-    }
+    ])
   },
   watch: {
     desc: {
@@ -79,6 +76,7 @@ export default {
   },
   created() {
     this.loading = true
+    //this.initDesc()
     this.getData()
     //this.initForm()
     this.loading = false
@@ -86,59 +84,49 @@ export default {
   mounted() {},
   methods: {
     /** 初始化Form和表格*/
-    initForm() {
+    /* initForm() {
       this.desc = this.getPageDesc(this.pageName)
-      for (const k in this.desc?.forms) {
-        this.formData[k.name] = undefined
+      if (this.desc?.forms) {
+        for (const k in this.desc.forms[0]) {
+          this.form[k.name] = undefined
+        }
+      }
+    },*/
+    initDesc() {
+      const desc = this.getPageDesc(this.pageName)
+      if (desc?.forms) {
+        this.descForm = desc.forms[0]
+      }
+      if (desc?.tables) {
+        this.descList = desc.tables[0]
       }
     },
     /** 查询明细数据 */
     getData() {
-      getDocList(this.docName).then((response) => {
-        this.forms = response.data.forms
-        this.tables = response.data.tables
-        const pageData = {
-          name: this.pageName,
-          forms: response.data.forms,
-          tables: response.data.tables
-        }
-        this.desc = this.getPageDescByValue(this.pageName, pageData)
-        this.$store.dispatch('desc/saveUserPageDesc', this.desc)
+      getDocList(this.dataType).then((response) => {
+        this.list = response.data.tables[this.dataType]
+        /*
+        if (!this.descForm && !this.descList) {
+          const desc = this.getPageDescByValue(this.pageName, {
+            name: this.pageName,
+            forms: response.data.forms,
+            tables: response.data.tables
+          })
+          this.$store.dispatch('desc/saveUserPageDesc', desc)
+          this.initDesc()
+        }*/
       })
     },
 
-    /** 刷新明细页 */
-    refreshPage() {
-      this.loading = true
-      // this.getData()
-      this.loading = false
-    },
-    /** 刷新表格 */
-    refreshTable() {
-      this.pageNum = 1
-      this.getData()
-    },
-    /** 搜索按钮操作 */
-    handleSubmit(value) {
-      this.loading = true
-      this.formData = value
-      this.refreshTable()
-      this.loading = false
-    },
-    handleReset() {
-      //this.$refs.erpForm.refreshForm()
-      this.handleSubmit()
-    },
     /** 双击打开编辑弹窗 */
-    onRowDbClick(row, col, evt, tbName) {
-      this.dbClickList = this.tables[tbName]
-      this.dbClickIndex = this.dbClickList.findIndex((obj) => obj.id == row.id)
+    onRowDbClick(row, col, evt) {
+      this.dbClickId = row.id
       this.ediorVisible = true
     },
     handleVouClose() {
       this.vouVisible = false
       this.loading = true
-      this.refreshTable()
+      this.getData()
       this.loading = false
     }
   }

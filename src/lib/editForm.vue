@@ -1,16 +1,17 @@
 <template>
-  <el-form ref="erpform" label-width="80px" :model="value" :inline="true">
+  <el-form ref="editform" label-width="80px" :model="value" :inline="true">
     <el-form-item
       v-for="item in items"
       :key="item.name"
       :prop="item.name"
       :label="item.label"
       :show-message="true"
+      :rules="rules[item.type]"
       label-width="auto"
     >
       <erp-input
         v-if="value"
-        :disabled="item.readOnly ? item.readOnly && readOnly : readOnly"
+        :disabled="readOnly"
         v-bind="item.attrs"
         :itemDesc="item"
         v-model="value[item.name]"
@@ -22,7 +23,7 @@
 <script>
 import ErpInput from './erpInput'
 export default {
-  name: 'ErpForm',
+  name: 'EditForm',
   components: { ErpInput },
   props: {
     desc: {
@@ -59,9 +60,19 @@ export default {
   data() {
     return {
       items: this.desc?.items ? [...this.desc.items] : [],
+      valid: function () {
+        let pass = false
+        this.$refs['editform'].validate((valid) => {
+          pass = valid
+        })
+        return pass
+      },
       rules: {
-        name: [{ required: true, message: '名称不能为空' }],
-        no: [{ required: true, message: '编号不能为空' }]
+        name: [{ required: true, message: '名称不能为空', trigger: 'blur' }],
+        no: [{ required: true, message: '编号不能为空', trigger: 'blur' }],
+        unum: [
+          { pattern: /^(0\.?\d{0,2}|[1-9]\d*\.?\d{0,2})$/, message: '必须为正数', trigger: 'blur' }
+        ],
       }
     }
   },
@@ -78,6 +89,13 @@ export default {
       }
       this.$emit('input', formData)
     }
+  },
+  validateForm() {
+    let pass = false
+    this.$refs['editform'].validate((valid) => {
+      pass = valid
+    })
+    return pass
   },
   created() {},
   mounted() {
