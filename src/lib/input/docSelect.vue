@@ -2,9 +2,11 @@
   <el-select
     ref="elselect"
     filterable
+    :filter-method="filterOption"
     clearable
     default-first-option
     placeholder="请选择"
+    @focus="onFocus"
     v-bind="$attrs"
     v-on="$listeners"
   >
@@ -25,8 +27,8 @@ export default {
   },
   data() {
     return {
-      //options: [],
-      // docOption: []
+      docOptions: [],
+      showOptions: []
     }
   },
   computed: {
@@ -38,36 +40,29 @@ export default {
       get() {
         return this.$attrs?.value
       }
-    },
-    docName: {
-      get() {
-        let dicName = this.prop.slice(0, -3)
-        const idx = dicName.lastIndexOf('_')
-        if (idx !== -1) {
-          dicName = dicName.substr(idx + 1)
-        }
-        return dicName
-      }
-    },
-    docOptions: {
-      get() {
-        return this.getDoc(this.docName)
-      }
-    },
+    }
+    /*
     showOptions: {
       get() {
+        if (!this.docOptions) {
+          return []
+        }
+        if (!this.inputVal && this.inputVal === '') {
+          return this.docOptions?.slice(0, 10)
+        }
+
         let options = []
 
         if (typeof this.inputVal === 'number') {
-          const idx = this.docOptions?.findIndex((obj) => obj.id === this.inputVal)
+          const idx = this.docOptions.findIndex((obj) => obj.id === this.inputVal)
           if (idx === -1) {
-            options = this.docOptions?.slice(0, 10)
+            options = this.docOptions.slice(0, 10)
             return
           }
           const len = this.docOptions.length
           if (len >= 10) {
             const begIdx = idx + 10 < len ? idx : Math.max(len - 10, 0)
-            options = this.docOptions?.slice(begIdx, begIdx + 10)
+            options = this.docOptions.slice(begIdx, begIdx + 10)
           } else {
             options = this.docOptions
           }
@@ -85,12 +80,10 @@ export default {
               )
             })
             ?.slice(0, 10)
-        } else {
-          options = this.docOptions?.slice(0, 10)
         }
         return options
       }
-    }
+    }*/
   },
   watch: {
     /*inputVal: {
@@ -103,13 +96,13 @@ export default {
     }*/
   },
   created() {
-    //this.initOptions()
+    // this.initOptions()
   },
   methods: {
     filterOption(query) {
       if (query !== '') {
         const q = query.toLowerCase()
-        this.options = this.docOptions
+        this.showOptions = this.docOptions
           .filter((item) => {
             return (
               item?.no?.toLowerCase().includes(q) ||
@@ -119,27 +112,47 @@ export default {
           })
           ?.slice(0, 10)
       } else {
-        this.options = this.docOptions?.slice(0, 10)
+        this.showOptions = this.docOptions?.slice(0, 10)
+      }
+    },
+    onFocus() {
+      if (!this.showOptions || this.showOptions.length === 0) {
+        this.filterOption(this.$refs.elselect.query)
       }
     },
     initOptions() {
-      const idx = this.docOptions.findIndex((obj) => obj.id === this.$attrs.value)
-      console.log(idx)
-      if (idx === -1) {
-        this.options = this.docOptions?.slice(0, 10)
+      if (!this.prop) {
         return
       }
+
+      let dicName = this.prop.slice(0, -3)
+      const did = dicName.lastIndexOf('_')
+      if (did !== -1) {
+        dicName = dicName.substr(did + 1)
+      }
+      this.docOptions = this.getDoc(dicName)
+      if (!this.docOptions) {
+        return
+      }
+
+      const idx = this.docOptions.findIndex((obj) => obj.id === this.$attrs.value)
+      if (idx === -1) {
+        this.showOptions = this.docOptions.slice(0, 10)
+        return
+      }
+
       const len = this.docOptions.length
       if (len >= 10) {
         const begIdx = idx + 10 < len ? idx : Math.max(len - 10, 0)
-        console.log(begIdx)
-        this.options = this.docOptions?.slice(begIdx, begIdx + 10)
+        this.showOptions = this.docOptions?.slice(begIdx, begIdx + 10)
       } else {
-        this.options = this.docOptions
+        this.showOptions = this.docOptions
       }
     }
   },
-  mounted() {}
+  beforeUpdate() {
+    this.initOptions()
+  }
 }
 </script>
 

@@ -155,46 +155,6 @@ export default {
               name: 'fk_res_invres',
               label: '开票资料',
               items: [
-                /*  {
-                  label: '档案状态',
-                  name: 'dstate_id',
-                  type: 'doc'
-                },
-                {
-                  label: 'end_num',
-                  name: 'end_num',
-                  type: 'num'
-                },
-                {
-                  label: 'ID',
-                  name: 'id',
-                  type: 'id'
-                },
-                {
-                  label: '期初数量',
-                  name: 'init_num',
-                  type: 'num'
-                },
-                {
-                  label: '型号',
-                  name: 'model',
-                  type: 'string'
-                },
-                {
-                  label: '名称',
-                  name: 'name',
-                  type: 'name'
-                },
-                {
-                  label: '编号',
-                  name: 'no',
-                  type: 'dno'
-                },
-                {
-                  label: '拼音码',
-                  name: 'py',
-                  type: 'string'
-                }*/
                 {
                   label: '开票品名',
                   name: 'invres_id',

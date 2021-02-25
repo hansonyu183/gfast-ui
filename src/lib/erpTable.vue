@@ -91,7 +91,6 @@ export default {
     },*/
     tableData: {
       handler(newVal) {
-        console.log(newVal)
         this.$emit('input', newVal)
       }
     }
@@ -100,7 +99,7 @@ export default {
     tableData: {
       get: function () {
         return this.value ?? []
-      },
+      }
     }
   },
   methods: {
