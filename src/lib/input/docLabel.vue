@@ -18,7 +18,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'getDocLabel'
+      'getOptLabel'
       // ...
     ]),
     docLabel() {
@@ -27,7 +27,7 @@ export default {
       if (idx !== -1) {
         docName = docName.substr(idx + 1)
       }
-      return this.getDocLabel(docName, this.value)
+      return this.getOptLabel(docName, this.value)
     }
   }
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container">
+  <div class="conter">
     <doc-act
       v-bind="$attrs"
       v-on="$listeners"
@@ -10,28 +10,34 @@
       :stateId="stateId"
     />
     <edit-form
-      ref="form"
+      :ref="this.dataType + 'Form'"
       v-if="desc ? desc.form : false"
       :desc="desc.form"
-      v-model="form"
+      v-model="mainForm"
       :readOnly="readOnly"
     />
-    <tab-table
-      v-if="desc ? desc.tables : false"
-      :desc="desc.tables"
-      :value="tables"
-      :readOnly="readOnly"
-    >
-    </tab-table>
+    <el-tabs v-model="activeName">
+      <el-tab-pane v-for="t in desc.tables" :key="t.name" :label="t.label" :name="t.name">
+        <erp-table
+          :ref="`tb_${t.name}`"
+          :showSave="true"
+          :readOnly="readOnly"
+          :desc="t"
+          :data="value[t.name]"
+          @saveTable="onSaveTable"
+        >
+        </erp-table>
+      </el-tab-pane>
+    </el-tabs>
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import { getDoc, saveDoc, delDoc, docAction } from '@/api/erp/doc'
 import PY from '@/utils/c2py.js'
+import docApi from '@/api/erp/doc'
+import { deepTrimNull } from '@/utils/erp.js'
 
-import TabTable from '@/lib/tabTable.vue'
+import MxEditor from '@/lib/minxis/mxEditor.vue'
 import EditForm from '@/lib/editForm.vue'
 import DocAct from '@/lib/docAct.vue'
 export default {
@@ -41,146 +47,63 @@ export default {
     TabTable,
     DocAct
   },
-  props: {
-    desc: {},
-    dataType: '',
-    dataId: 0
-  },
+  mixins: [MxEditor],
+  props: {},
   data() {
     return {
-      //  desc: undefined,
-      //form数据
-      form: {},
-      //table数据
-      tables: {},
-      id: this.dataId,
-      nextId: 0,
-      preId: 0
+      api: docApi,
+      activeName: this.desc.tables[0]?.name
     }
   },
   computed: {
-    ...mapGetters({
-      stateStore: 'state'
-      // ...
-    }),
-    stateId: {
+    valideRef: {
       get: function () {
-        return this.form?.state_id ?? 0
+        let refs = [this.dataType + 'Form']
+        for (const item of this.desc.tables) {
+          refs.push(`tb_${item.id}`)
+        }
+        return refs
       }
     },
-    readOnly: {
-      // getter
+    mainForm: {
       get: function () {
-        return 1 === this.stateStore.find((obj) => obj.id === this.stateId)?.read_only
+        return this.data.forms ? this.data.forms[this.dataType] : {}
+      },
+      set: function (newVal) {
+        this.data.forms[this.dataType] = newVal
       }
     },
-    name: {
+    nameVal: {
       get: function () {
-        return this.form?.name
+        return this.mainForm?.name
       }
     }
   },
   watch: {
-    dataId: {
-      handler(nval) {
-        this.id = nval
-      }
-    },
-    id: {
-      handler() {
-        this.getData()
-      },
-      immediate: true
-    },
-    name: {
+    nameVal: {
       handler(newVal) {
-        if (!this.readOnly) {
-          this.form.py = PY.chineseToPinYin(newVal)
+        if (!this.readOnly && newVal) {
+          this.mainForm['py'] = PY.chineseToPinYin(newVal)
         }
       }
     }
   },
-  created() {
-    this.getData()
-  },
-  mounted() {},
   methods: {
-    /** 查询明细数据 */
-    getData() {
-      getDoc(this.dataType, this.id).then((response) => {
-        this.nextId = response.data.nextId
-        this.preId = response.data.preId
-        this.form = response.data.form
-        this.tables = response.data.tables
-      })
-    },
-    saveData() {
-      saveDoc(this.dataType, this.id, { form: this.form, tables: this.tables }).then((response) => {
+    onSaveTable() {
+      let tbData = { tables: this.data.tables }
+      deepTrimNull(tbData)
+      this.api.saveSub(this.dataType, this.id, tbData).then((response) => {
         if (response.code === 200) {
-          this.id = response.data
           this.msgSuccess('保存成功')
-          this.getData()
         } else {
           this.msgError(response.msg)
         }
       })
-    },
-    delData() {
-      delDoc(this.dataType, this.id).then((response) => {
-        if (response.code === 200) {
-          this.msgSuccess('删除成功')
-        } else {
-          this.msgError(response.msg)
-        }
-      })
-    },
-    docAction(act) {
-      docAction(this.dataType, this.id, act, { form: this.form, tables: this.tables }).then(
-        (response) => {
-          if (response.code === 200) {
-            this.id = response.data
-            this.msgSuccess('操作成功')
-            this.getData()
-          } else {
-            this.msgError(response.msg)
-          }
-        }
-      )
-    },
-    onAction(act) {
-      switch (act) {
-        case 'add':
-          this.getData()
-          break
-        case 'pre':
-          this.getData()
-          break
-        case 'next':
-          this.getData()
-          break
-        case 'print':
-          break
-        case 'save':
-          if (this.$refs.form.valid()) {
-            this.docAction(act)
-          } else {
-            this.msgError('数据有误，请核查！')
-          }
-          break
-        default:
-          this.docAction(act)
-          break
-      }
     }
   }
 }
 </script>
 
 <style>
-/* el-divider 修改高度&虚线效果 */
-.el-divider--horizontal {
-  margin: 8px 0;
-  background: 0 0;
-  border-top: 1px dashed #e8eaec;
-}
+
 </style>

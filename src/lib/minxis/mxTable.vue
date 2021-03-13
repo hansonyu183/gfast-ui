@@ -1,111 +1,128 @@
-
 <script>
-import { debounce } from '@/utils'
 export default {
   props: {
+    desc: {
+      type: Object
+    },
     value: {
-      type: Array,
-      default: function () {
-        return []
-      }
+      type: Array
     },
-    filters: {
-      type: Object,
-      default: function () {
-        return {
-          //id: [0],
-          //name:['name']
-        }
-      }
-    }
+    main: {},
+    formRules: {},
+    readOnly: false,
+    showSave: false
   },
-  data() {
-    return {
-      search: '',
-      searchData: [],
-      filterData: [],
-      pageNum: 0,
-      pageSize: 10
-    }
-  },
-  computed: {
-    pageCount: function () {
-      return this.searchData?.length ?? 0
-    },
-    pageData() {
-      if (this.searchData) {
-        let pd = this.searchData.slice(
-          (this.pageNum - 1) * this.pageSize,
-          this.pageNum * this.pageSize - 1
-        )
-        return pd
-      } else return []
-    }
-  },
+  data() {},
   watch: {
-    filters: {
-      handler(newVal) {
-        if (newVal && newVal !== null) {
-          this.filterData = this.value.filter((item) => {
-            let pass = true
-            for (const key in newVal) {
-              if (Object.hasOwnProperty.call(newVal, key)) {
-                const el = newVal[key]
-                const tp = Object.prototype.toString.call(el)
-                if (tp === '[object Array]') {
-                  if (el?.length > 0) {
-                    pass = pass && el.includes(item[key])
-                  }
-                } else {
-                  if (el) {
-                    pass = pass && el == item[key]
-                  }
-                }
-
-                if (!pass) {
-                  break
-                }
-              }
-            }
-            return pass
-          })
-          this.search = ''
-          this.searchData = this.filterData
+    main: {
+      handler() {
+        if (this.readOnly) {
+          return
         }
-      },
-      // immediate如果为true 代表如果在 wacth 里声明了之后，就会立即先去执行里面的handler方法
-      // 初始化立即执行，这样我们就可以在created中去掉某些预先请求接口了
-      //immediate: true,
-      deep: true // 如果是对象要深度监听
-    },
-
-    value: {
-      handler(newVal) {
-        this.searchData = newVal
-        this.filterData = newVal
+        if (this.tableData.length === 0) {
+          this.addRow()
+        }
       },
       immediate: true
     }
   },
-  methods: {
-    filterDoc: debounce(function () {
-      if (this.search !== '') {
-        let s = this.search.toLowerCase()
-        this.searchData = this.filterData.filter((item) => {
-          return (
-            item.no.toLowerCase().includes(s) ||
-            item.name.toLowerCase().includes(s) ||
-            item.py.toLowerCase().includes(s)
-          )
-        })
-      } else {
-        this.searchData = this.filterData
+  computed: {
+    tableData: {
+      get() {
+        return this.value
+      },
+      set(val) {
+        this.$emit('input', val)
       }
-    }, 300),
-    
+    },
+
+    colNum: {
+      get: function () {
+        return this.desc.items.length
+      }
+    },
+    rowNum: {
+      get: function () {
+        return this.tableData?.length
+      }
+    },
+    cellNum: {
+      get: function () {
+        return this.rowNum * this.colNum
+      }
+    },
+    cells: {
+      get: function () {
+        return this.$refs[`tb_${this.desc.name}`].$children.find(
+          (obj) => obj.$el.className === 'el-table__body'
+        )?.$children
+      }
+    }
+  },
+  methods: {
+    saveTable() {
+      this.$emit('saveTable', this.desc.name)
+    },
+    addRow() {
+      let newRow = {}
+      for (const item of this.desc.items) {
+        newRow[item.name] = null
+      }
+      let maxId = 0
+      if (this.tableData.length > 0) {
+        maxId = this.tableData.reduce(function (pre, cur) {
+          return Math.max(cur.id, pre)
+        }, 0)
+      }
+      const newID = maxId + 1
+      newRow['id'] = newID
+      this.tableData.push(newRow)
+    },
+    delRow(index) {
+      if (this.tableData.length > 1) {
+        this.tableData.splice(index, 1)
+      }
+    },
+    //键盘触发事件
+    onKeyUp(ev, colIndex, rowIndex, row) {
+      //向上 =38
+      if (ev.keyCode == 38) {
+        if (rowIndex > 0) {
+          const cellIndex = (rowIndex - 1) * this.colNum + colIndex + 1
+          this.cells[cellIndex]?.$children[1].focus()
+        }
+      }
+      //下 = 40
+      if (ev.keyCode == 40) {
+        if (rowIndex === this.rowNum - 1) {
+          this.addRow()
+        }
+        const cellIndex = (rowIndex + 1) * this.colNum + colIndex + 1
+        this.$nextTick(() => {
+          this.cells[cellIndex]?.$children[1].focus()
+        })
+      }
+
+      //左 = 37
+      if (ev.keyCode == 37) {
+        if (colIndex > 1) {
+          const cellIndex = rowIndex * this.colNum + colIndex
+          this.cells[cellIndex]?.$children[1].focus()
+        }
+      }
+
+      //右 = 39
+      if (ev.keyCode == 39) {
+        if (colIndex < this.colNum) {
+          const cellIndex = rowIndex * this.colNum + colIndex + 2
+          this.cells[cellIndex]?.$children[1].focus()
+        }
+      }
+      //删除 = 46
+      if (ev.keyCode == 46) {
+          this.delRow(rowIndex, row)
+      }
+    }
   }
 }
 </script>
-
-<style>
-</style>

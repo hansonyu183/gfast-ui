@@ -1,6 +1,6 @@
-<template >
+<template  >
   <el-row type="flex" justify="start" align="top" :gutter="1">
-    <el-col :span="20">
+    <el-col :span="8">
       <el-row type="flex" justify="start" align="top" :gutter="1">
         <el-tooltip v-show="preId" class="item" effect="dark" content="前单" placement="top-start">
           <el-button icon="el-icon-arrow-left" @click="onAction({ no: 'pre' })" />
@@ -49,7 +49,10 @@
         </el-tooltip>
       </el-row>
     </el-col>
-    <el-col :span="4">
+    <el-col :span="20">
+      <slot></slot>
+    </el-col>
+    <el-col :span="2">
       <el-button v-if="state" type="danger" round plain disabled>{{ state.name }}</el-button>
     </el-col>
   </el-row>
@@ -57,16 +60,25 @@
 
 <script>
 import mxAct from './minxis/mxAct'
+import { mapGetters } from 'vuex'
+import { number } from 'echarts/lib/export'
 
 export default {
-  name: 'DocAct',
+  name: 'VrAct',
   components: {},
   mixins: [mxAct],
-  props: {},
+  props: {
+    value: {}
+  },
   data() {
     return {}
   },
-  computed: {},
+  computed: {
+    ...mapGetters({
+      auth: 'authVr'
+      // ...
+    }),
+  },
   watch: {},
   created() {},
   mounted() {},

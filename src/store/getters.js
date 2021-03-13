@@ -135,14 +135,24 @@ const getters = {
   permission_routes: state => state.permission.routes,
 
   ///////////////////////doc
-  getDoc: (state) => (docName) => {
-    return state.doc[docName]
+  sysUser: (state) => {
+    return state.ui.opt.user.find((obj) => obj.no === state.user.name)
   },
-  getDocLabel: (state) => (docName, docId) => {
-    return state.doc[docName].find(obj => obj.id == docId)?.name ?? docId
+  getOpt: (state) => (optName) => {
+    return state.ui.opt[optName]
   },
-  act: state => state.doc.act,
-  state: state => state.doc.state,
+  getOptLabel: (state) => (optName, id) => {
+    return state.ui.opt[optName].find(obj => obj.id == id)?.name ?? id
+  },
+  getOptField: (state) => (optName, field, id) => {
+    const doc = state.ui.opt[optName].find(obj => obj.id == id)
+    return doc ? doc[field] : ''
+  },
+  act: state => state.ui.opt.act,
+  state: state => state.ui.opt.state,
+  authVr: state => state.ui.auth.vr,
+  authDoc: state => state.ui.auth.doc,
+
   ////////////////////////desc
   canModifyUI: state => state.desc.canModifyUI,
   userDesc: state => state.desc.user,
@@ -181,8 +191,5 @@ const getters = {
     }
     return pageDesc
   }
-
 }
-
-
 export default getters

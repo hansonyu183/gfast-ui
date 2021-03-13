@@ -3,53 +3,7 @@ import { getDesc, addDesc, delDesc, saveDesc } from '@/api/erp/desc'
 const state = {
   canModifyUI: false,
   user:
-  {/*
-    pages: [
-      {
-        name: 'ebaList_page',
-        type: 'page',
-        forms: [
-          {
-            name: 'query_form',
-            label: '查询参数',
-            items: [
-              {
-                name: 'name',
-                label: '名称',
-                type: 'string'
-              },
-              {
-                name: 'emp_id',
-                label: '员工',
-              },
-              {
-                name: 'address',
-                label: '地址',
-              }
-            ],
-          },//form:query
-          {
-            name: 'edit',
-            label: '编辑',
-            items: [
-              {
-                name: 'date',
-                label: '日期'
-              },
-            ],
-          }//form:edit
-        ],//forms
-        tables: [
-          {
-            name: 'eba',
-            label: '客户',
-            cols: [
-
-            ]
-          }//table:eba
-        ]//tables
-      }//page:ebaList
-    ],*/
+  {
   },
   tables: {
 

@@ -37,12 +37,12 @@
   </div>
 </template>
 <script>
-import ErpLabel from './erpLabel.vue'
-import  mxTable  from './minxis/mxTable'
+import ErpLabel from './input/erpLabel.vue'
+import  mxList  from './minxis/mxList'
 export default {
   name: 'ErpList',
   components: { ErpLabel },
-  mixins:[mxTable],
+  mixins:[mxList],
   props: {
     desc: {
       type: Object

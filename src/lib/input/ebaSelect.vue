@@ -1,24 +1,43 @@
 <template>
-  <el-select
-    ref="elselect"
-    filterable
-    :filter-method="filterOption"
-    clearable
-    default-first-option
-    @focus="onFocus"
-    @blur="onBlur"
-    v-bind="$attrs"
-    v-on="$listeners"
-  >
-    <el-option v-for="item in showOptions" :key="item.id" :label="item.name" :value="item.id">
-    </el-option>
-  </el-select>
+  <el-row type="flex" justify="start" align="top" :gutter="1">
+    <el-col :span="8">
+      <el-select
+        ref="elselect"
+        filterable
+        :filter-method="filterOption"
+        clearable
+        default-first-option
+        @focus="onFocus"
+        v-bind="$attrs"
+        v-on="$listeners"
+      >
+        <el-option v-for="item in showOptions" :key="item.id" :label="item.name" :value="item.id">
+        </el-option>
+      </el-select>
+    </el-col>
+    <el-col :span="8">
+      <el-input v-model="ebaTel" class="eba_tel">
+        <template slot="prepend">电话</template>
+      </el-input>
+    </el-col>
+    <el-col :span="8">
+      <el-input v-model="ebaAddress" class="eba_address">
+        <template slot="prepend">地址</template>
+      </el-input>
+    </el-col>
+    <el-col :span="8">
+      <el-input v-model="ebaSq" class="eba_ebasq" :disabled="true">
+        <template slot="prepend">数期</template>
+      </el-input>
+    </el-col>
+  </el-row>
+  
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
 export default {
-  name: 'DocSelect',
+  name: 'EbaSelect',
   props: {
     prop: {
       type: String,
@@ -27,7 +46,10 @@ export default {
   },
   data() {
     return {
-      showOptions: []
+      showOptions: [],
+      ebaTel: '',
+      ebaAddress: '',
+      ebaSq: ''
     }
   },
   computed: {
@@ -37,12 +59,17 @@ export default {
     ]),
     docName: {
       get() {
-        let dicName = this.prop.slice(0, -3)
-        const did = dicName.lastIndexOf('_')
-        if (did !== -1) {
-          dicName = dicName.substr(did + 1)
-        }
-        return dicName
+        return 'eba'
+      }
+    },
+    eba: {
+      get() {
+        return this.docOptions?.find((item) => item.id === this.inputVal)
+      }
+    },
+    ebaSqName: {
+      get() {
+        return this.getOpt('ebasq')?.find((item) => item.id === this.eba?.ebasq_id)?.name ?? ''
       }
     },
     docOptions: {
@@ -59,6 +86,9 @@ export default {
   watch: {
     inputVal: {
       handler(newVal, oldVal) {
+        this.ebaAddress = this.eba?.address
+        this.ebaTel = this.eba?.tel
+        this.ebaSq = this.ebaSqName
         if (
           newVal !== oldVal &&
           this.showOptions.findIndex((obj) => obj.id === this.inputVal) === -1
@@ -92,9 +122,6 @@ export default {
         this.updateOptions()
       }
     },
-    onBlur() {
-      this.$refs.elselect.blur()
-    },
     updateOptions() {
       if (!this.prop) {
         return
@@ -116,13 +143,17 @@ export default {
       } else {
         this.showOptions = this.docOptions
       }
-    },
-    focus() {
-      this.$refs.elselect.focus()
     }
   }
 }
 </script>
 
 <style>
+.el-input-group__prepend {
+  font-weight: 700;
+  font-size: 14px;
+  color: #606266;
+  background: none;
+  border: none;
+}
 </style>

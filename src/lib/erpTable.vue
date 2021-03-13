@@ -2,120 +2,69 @@
   <div>
     <el-row v-if="!readOnly" type="flex" class="row-bg" justify="space-between">
       <el-col>
-        <el-tooltip class="item" effect="dark" content="新增" placement="top-start">
-          <el-button type="primary" icon="el-icon-plus" @click="addRow"></el-button>
+        <el-tooltip v-if="showSave" class="item" effect="dark" content="保存" placement="top-start">
+          <el-button type="primary" icon="el-icon-document" @click="saveTable"></el-button>
         </el-tooltip>
       </el-col>
     </el-row>
-    <el-table
-      v-if="desc.items"
-      max-height="600"
-      fit
-      border
-      row-key="id"
-      align="left"
-      :data="tableData"
-      v-bind="$attrs"
-      v-on="$listeners"
-    >
-      <el-table-column
-        v-for="item in desc.items"
-        :key="'col_' + item.name"
-        :prop="item.name"
-        :label="item.label"
+    <el-form :model="formModel" ref="validForm">
+      <el-table
+        v-if="desc.items"
+        :ref="`tb_${desc.name}`"
+        max-height="600"
+        style="width: 100%; margin-bottom: 20px"
+        fit
+        border
+        align="left"
+        v-bind="$attrs"
+        v-on="$listeners"
       >
-        <template v-slot="scope">
-          <erp-input
-            v-if="tableData"
-            :itemDesc="item"
-            v-model="scope.row[scope.column.property]"
-            :disabled="item.readOnly ? item.readOnly && readOnly : readOnly"
-          />
-        </template>
-      </el-table-column>
-      <el-table-column v-if="!readOnly" fixed="right" label="操作" width="120">
-        <template slot-scope="scope">
-          <el-button
-            @click.native.prevent="delRow(scope.$index, tableData)"
-            type="text"
-            size="small"
-          >
-            移除
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+        <slot name="firstCol"></slot>
+        <el-table-column
+          :class="`col_${desc.name}_${item.name}`"
+          v-for="(item, colIndex) in desc.items"
+          :key="'col_' + item.name"
+          :prop="item.name"
+          :label="item.label"
+        >
+          <template v-slot="scope">
+            <el-form-item
+              :prop="`tableData[${scope.$index}].${item.name}`"
+              :rules="rules[item.type]"
+            >
+              <erp-input
+                class="tb-input"
+                :itemDesc="item"
+                :disabled="item.readOnly ? item.readOnly && readOnly : readOnly"
+                v-model="scope.row[scope.column.property]"
+                @keyup.ctrl.native="onKeyUp($event, colIndex, scope.$index)"
+                @change="$emit('cellChange', scope, desc.name)"
+              />
+            </el-form-item>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-form>
   </div>
 </template>
 <script>
-import ErpInput from './erpInput.vue'
+import ErpInput from './input/erpInput.vue'
+import MxTable from './minxis/mxTable'
 export default {
   name: 'ErpTable',
   components: { ErpInput },
-  props: {
-    desc: {
-      type: Object
-    },
-    value: {
-      type: Array,
-      default: function () {
-        return []
-      }
-    },
-    readOnly: false
-  },
+  mixins: [MxTable],
+  props: {},
   data() {
-    return {
-      /*
-      tableData: [
-        {
-          type: Array,
-          default: function () {
-            return []
-          }
-        }
-      ]*/
-    }
+    return {}
   },
-  watch: {
-    /* value: {
-      handler(newVal) {
-        if (newVal) {
-          this.tableData = newVal
-        } else {
-          this.tableData = []
-        }
-        console.log(this.tableData !== null)
-      },
-      immediate: true
-    },*/
-    tableData: {
-      handler(newVal) {
-        this.$emit('input', newVal)
-      }
-    }
-  },
-  computed: {
-    tableData: {
-      get: function () {
-        return this.value ?? []
-      }
-    }
-  },
-  methods: {
-    addRow() {
-      let newRow = {}
-      for (const val of this.desc.items) {
-        newRow[val.name] = null
-      }
-      this.tableData.push(newRow)
-    },
-    delRow(index, rows) {
-      rows.splice(index, 1)
-    }
-  }
+  watch: {},
+  computed: {}
 }
 </script>
 
-<style>
+<style scoped>
+.tb-input >>> .el-input__inner {
+  border: none;
+}
 </style>

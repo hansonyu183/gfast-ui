@@ -24,7 +24,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { getDocList } from '@/api/erp/doc'
+import docApi from '@/api/erp/doc'
 import ErpList from '@/lib/erpList.vue'
 import QueryForm from '@/lib/queryForm.vue'
 import DocEditor from './docEditor.vue'
@@ -67,31 +67,15 @@ export default {
     ])
   },
   watch: {
-    desc: {
-      handler(val) {
-        // this.$store.dispatch('desc/saveUserPageDesc', val)
-      },
-      deep: true
-    }
   },
   created() {
     this.loading = true
-    //this.initDesc()
     this.getData()
-    //this.initForm()
     this.loading = false
   },
   mounted() {},
   methods: {
-    /** 初始化Form和表格*/
-    /* initForm() {
-      this.desc = this.getPageDesc(this.pageName)
-      if (this.desc?.forms) {
-        for (const k in this.desc.forms[0]) {
-          this.form[k.name] = undefined
-        }
-      }
-    },*/
+
     initDesc() {
       const desc = this.getPageDesc(this.pageName)
       if (desc?.forms) {
@@ -103,18 +87,8 @@ export default {
     },
     /** 查询明细数据 */
     getData() {
-      getDocList(this.dataType).then((response) => {
+      docApi.getList(this.dataType).then((response) => {
         this.list = response.data.tables[this.dataType]
-        /*
-        if (!this.descForm && !this.descList) {
-          const desc = this.getPageDescByValue(this.pageName, {
-            name: this.pageName,
-            forms: response.data.forms,
-            tables: response.data.tables
-          })
-          this.$store.dispatch('desc/saveUserPageDesc', desc)
-          this.initDesc()
-        }*/
       })
     },
 
@@ -123,12 +97,6 @@ export default {
       this.dbClickId = row.id
       this.ediorVisible = true
     },
-    handleVouClose() {
-      this.vouVisible = false
-      this.loading = true
-      this.getData()
-      this.loading = false
-    }
   }
 }
 </script>

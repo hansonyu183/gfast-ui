@@ -8,37 +8,32 @@ export function getErpInfo(name) {
   })
 }
 
-export function getAllDoc() {
-  return request({
-    url: '/erp/store/doc',
-    method: 'get'
-  })
-}
+
 
 export function getAllDesc() {
   return request({
-    url: '/erp/store/desc',
+    url: '/erp/ui/desc',
     method: 'get'
   })
 }
 
 export function getUserDesc(user) {
   return request({
-    url: '/erp/store/desc/user/' + user,
+    url: '/erp/ui/desc/user/' + user,
     method: 'get',
   })
 }
 
 export function getRoleDesc(role) {
   return request({
-    url: '/erp/store/desc/role/' + role,
+    url: '/erp/ui/desc/role/' + role,
     method: 'get',
   })
 }
 
 export function saveUserDesc(user, desc) {
   return request({
-    url: '/erp/store/desc/user/' + user,
+    url: '/erp/ui/desc/user/' + user,
     method: 'post',
     params: desc
   })
@@ -46,7 +41,7 @@ export function saveUserDesc(user, desc) {
 
 export function saveRoleDesc(role, desc) {
   return request({
-    url: '/erp/store/desc/role/' + role,
+    url: '/erp/ui/desc/role/' + role,
     method: 'post',
     params: desc
   })

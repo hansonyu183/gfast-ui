@@ -214,6 +214,27 @@ export default {
                   type: 'doc'
                 }
               ]
+            },
+            {
+              name: 'eba_formula',
+              label: '客户配方',
+              items: [
+                {
+                  label: '产品',
+                  name: 'res_id',
+                  type: 'doc'
+                },
+                {
+                  label: '成分',
+                  name: 'formula_res_id',
+                  type: 'doc'
+                },
+                {
+                  label: '数量',
+                  name: 'per_num',
+                  type: 'unum'
+                }
+              ]
             }
           ]
         }

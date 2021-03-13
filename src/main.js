@@ -72,11 +72,14 @@ new Vue({
   store,
   render: h => h(App),
   created: async function () {
-    await this.$store.dispatch('doc/loadALLDoc', 'ALL')
-      .catch(() => {
-      });
-    await this.$store.dispatch('desc/loadLabel').catch(() => { })
-    await this.$store.dispatch('desc/loadUser', 'admin').catch(() => { })
-
+    try {
+      await this.$store.dispatch('ui/loadALLOpt')
+      await this.$store.dispatch('ui/loadAuth')
+      await this.$store.dispatch('ui/loadDict')
+      await this.$store.dispatch('desc/loadLabel')
+      //await this.$store.dispatch('desc/loadUser', 'admin')
+    } catch (e) {
+      console.log(e)
+    }
   }
 })

@@ -1,0 +1,139 @@
+thead,
+button,
+.el-input-group__prepend,
+.el-form--inline .el-form-item__label,
+.el-table__fixed-right
+ {
+  display: none;
+} 
+
+input{
+  background:none;
+  border:none
+}
+
+.vr_vno{
+  position:fixed;
+  left:600px;
+  top:30px;
+}
+
+.vr_date{
+  position:fixed;
+  left: 600px;;
+  top:70px;
+}
+
+.vr_main_eba_id{
+  position:fixed;
+  left:50px;
+  top:50px;
+}
+
+.eba_tel{
+  position:fixed;
+  left: 600px;;
+  top:50px;
+}
+
+.eba_address{
+  position:fixed;
+  left:50px;
+  top:70px;
+}
+
+.eba_ebasq{
+  position:fixed;
+  left:50px;
+  top:90px;
+}
+
+.vr_main_amo,
+.vr_main_bill_lmt_date,
+.vr_main_brand_id,
+.vr_main_bill_month,
+.vr_main_inveba_id,
+.vr_main_kpi_num,
+.vr_main_kpi_amo,
+.vr_main_order_date,
+.vr_main_tran_date
+{
+  display: none;
+}
+
+
+
+.vr_main_print_pack_num{
+  position:fixed;
+  left:600px;
+  top:520px;
+}
+
+.vr_main_print_amo{
+  position:fixed;
+  left:600px;
+  top:500px;
+}
+
+.vr_main_emp_id{
+  position:fixed;
+  left:300px;
+  top:550px;
+}
+.sys_user{
+  position:fixed;
+  left:300px;
+  top:530px;
+}
+
+table.el-table__body{
+  position:fixed;
+  left:50px;
+  top:120px;
+  table-layout:fixed;
+}
+
+table.el-table__footer{
+  position:fixed;
+  left:50px;
+  top:400px;
+  table-layout:fixed;
+}
+
+.hidden-columns,
+.el-table__header-wrapper{
+  display: none;
+}
+colgroup,col{
+  display: none;
+}
+td{
+  overflow:hidden;
+  word-break:break-all;
+
+}
+
+.el-table_1_column_1{
+  width: 40px;
+  max-width: 40px;
+}
+.el-table_1_column_2{
+  width: 100px;
+}
+.el-table_1_column_3 {
+  width: 0px;
+  display: none;
+}
+
+.el-table_1_column_4,
+.el-table_1_column_5,
+.el-table_1_column_6,
+.el-table_1_column_7{
+  width: 50px;
+}
+
+.el-table_1_column_8{
+  width: 100px;
+
+}
+
