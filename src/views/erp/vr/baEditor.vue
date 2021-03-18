@@ -1,7 +1,8 @@
 <template>
   <vr-ba-editor
     ref="editor"
-    dataType="BA"
+    type="BA"
+    :serv="serv"
     :dataId="0"
     :desc="pageDesc"
     printCss="./print/vr_ba.css"
@@ -11,7 +12,7 @@
 
 <script>
 import VrBaEditor from './components/vrBaEditor.vue'
-
+import { server } from './serv/baServ.js'
 import Page from '../page'
 export default {
   name: 'BaEditor',
@@ -19,6 +20,10 @@ export default {
     VrBaEditor
   },
   mixins: [Page],
+  computed: {
+    serv: () => server
+  },
+
   data() {
     return {
       pageName: 'baEditor',
@@ -58,9 +63,19 @@ export default {
               type: 'unum'
             },
             {
-              label: '送货日期',
+              label: '交货日期',
               name: 'tran_date',
               type: 'date'
+            },
+            {
+              label: '运输方式',
+              name: 'tran_price',
+              type: 'dict'
+            },
+            {
+              label: '数期',
+              name: 'sq_price',
+              type: 'sqPrice'
             },
             {
               label: '打印桶数',
@@ -133,6 +148,11 @@ export default {
               label: '金额',
               name: 'amo',
               type: 'unum'
+            },
+            {
+              label: '参考价',
+              name: 'guide_price',
+              type: 'price'
             }
           ],
           vrPf: {
@@ -169,6 +189,11 @@ export default {
                 label: '金额',
                 name: 'amo',
                 type: 'amo'
+              },
+              {
+                label: '参考价',
+                name: 'guide_price',
+                type: 'price'
               }
             ]
           }
@@ -176,6 +201,7 @@ export default {
       }
     }
   },
+
   methods: {}
 }
 </script>

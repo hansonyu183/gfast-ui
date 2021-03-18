@@ -2,7 +2,7 @@ import request from '@/utils/request'
 const optApi = {
   getAllOpt: function () {
     return request({
-      url: '/erp/ui/opt',
+      url: '/erp/ui/opt/all',
       method: 'get'
     })
   },
@@ -12,7 +12,12 @@ const optApi = {
       method: 'get'
     })
   },
-
+  getByNameAndID: function (optName, id) {
+    return request({
+      url: `/erp/ui/opt/${optName}/${id}`,
+      method: 'get'
+    })
+  },
 }
 
 const authApi = {

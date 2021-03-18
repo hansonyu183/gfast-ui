@@ -138,6 +138,9 @@ const getters = {
   sysUser: (state) => {
     return state.ui.opt.user.find((obj) => obj.no === state.user.name)
   },
+  getDict: (state) => (dictType) => {
+    return state.ui.dict.find((obj) => obj.dictType === dictType)?.data
+  },
   getOpt: (state) => (optName) => {
     return state.ui.opt[optName]
   },

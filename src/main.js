@@ -66,7 +66,7 @@ Vue.use(Element, {
 
 Vue.config.productionTip = false
 
-new Vue({
+let vueThis=new Vue({
   el: '#app',
   router,
   store,
@@ -83,3 +83,5 @@ new Vue({
     }
   }
 })
+
+export default vueThis

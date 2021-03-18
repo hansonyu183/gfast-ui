@@ -25,13 +25,7 @@
         <template slot="prepend">地址</template>
       </el-input>
     </el-col>
-    <el-col :span="8">
-      <el-input v-model="ebaSq" class="eba_ebasq" :disabled="true">
-        <template slot="prepend">数期</template>
-      </el-input>
-    </el-col>
   </el-row>
-  
 </template>
 
 <script>

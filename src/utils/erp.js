@@ -33,7 +33,6 @@ export function getDateByStr(str) {
     const year = str.substr(0, 4)
     const month = str.substr(4, 2)
     const day = str.substr(6, 2)
-    console.log(year, month, day)
     let myDate = new Date();
     myDate.setFullYear(year, month, day);
     return myDate

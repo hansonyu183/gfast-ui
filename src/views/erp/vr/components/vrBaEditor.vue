@@ -1,14 +1,14 @@
 <template>
-  <el-form :model="data" ref="editorForm" id="print" label-width="80px" :inline="true">
+  <el-form :model="servMod" ref="editorForm" id="print" label-width="80px" :inline="true">
     <vr-act
+      v-if="servMod.vr"
       v-bind="$attrs"
       v-on="$listeners"
-      @action="onAction"
-      :id.sync="id"
-      :nextId="nextId"
-      :preId="preId"
+      :id.sync="servMod.vr.id"
+      :nextId="servMod.nextId"
+      :preId="servMod.preId"
       :stateId="stateId"
-      :dataType="dataType"
+      :dataType="servMod.type"
     >
       <el-form-item
         v-for="item in desc.vr.items"
@@ -16,56 +16,56 @@
         :prop="`vr.${item.name}`"
         :label="item.label"
         :show-message="true"
-        :rules="rules[item.type]"
       >
         <erp-input
           :class="`vr_${item.name}`"
-          :disabled="readOnly"
           :itemDesc="item"
-          v-model="data.vr[item.name]"
+          v-model.lazy="servMod.vr[item.name]"
         />
       </el-form-item>
     </vr-act>
-    <el-form-item
-      v-for="item in desc.vrMain.items"
-      :key="item.name"
-      :prop="`vrMain.${item.name}`"
-      :label="item.label"
-      :show-message="true"
-      :rules="rules[item.type]"
-    >
-      <erp-input
-        :class="`vr_main_${item.name}`"
-        :disabled="readOnly"
-        :itemDesc="item"
-        v-model="data.vrMain[item.name]"
-      />
-    </el-form-item>
-    <el-input class="sys_user" :placeholder="sysUser.name" :disabled="true" />
+    <div v-if="servMod.vrMain">
+      <el-form-item
+        v-for="item in desc.vrMain.items"
+        :key="item.name"
+        :prop="`vrMain.${item.name}`"
+        :label="item.label"
+        :show-message="true"
+        v-model.lazy="servMod.vrMain[item.name]"
+      >
+        <erp-input
+          :class="`vr_main_${item.name}`"
+          :itemDesc="item"
+          v-model.lazy="servMod.vrMain[item.name]"
+        />
+      </el-form-item>
+    </div>
     <res-table
+      v-if="servMod.vrNum"
       class="vr-num"
       ref="vrNum"
+      mainProp="vrNum"
+      expandProp="vrPf"
+      show-summary
       :formRules="rules"
       :desc="desc.vrNum"
-      v-model="data.vrNum"
-      :main="data.vrMain"
-      :hasPf="true"
-      :pf="data.vrPf"
+      v-model.lazy="servMod.vrNum"
       :readOnly="readOnly"
     >
     </res-table>
+    <!--
+
+
+  -->
   </el-form>
 </template>
 
 <script>
-import { BigNumber } from 'bignumber.js'
 import { mapGetters } from 'vuex'
 import * as erp from '@/utils/erp.js'
 
-import vrApi from '@/api/erp/vr'
-
-import MxEditor from '@/lib/minxis/mxEditor.vue'
-import ResTable from '@/lib/resTable.vue'
+import MxEditor from './mxEditor.vue'
+import ResTable from './resTable'
 import ErpInput from '@/lib/input/erpInput.vue'
 import VrAct from '@/lib/vrAct.vue'
 export default {
@@ -76,120 +76,101 @@ export default {
     ErpInput
   },
   mixins: [MxEditor],
-
-  props: {},
+  props: {
+    serv: {},
+    desc: {},
+    type: ''
+  },
   data() {
     return {
-      api: vrApi,
-      showUser: false,
-      data: {
-        nextID: 0,
-        preID: 0,
-        vr: {},
-        vrMain: {},
-        vrNum: [],
-        vrPf: []
-      }
+      servMod: {}
     }
   },
   computed: {
     ...mapGetters({
-      sysUser: 'sysUser',
-      getOptField: 'getOptField',
-      getOptLabel: 'getOptLabel'
+      stateStore: 'state'
       // ...
     }),
     mainForm: {
-      get: function () {
-        return this.data.vr
+      get() {
+        return this.servMod.vr
       },
-      set: function (newVal) {
-        this.data.vr = newVal
+      set(newVal) {
+        this.servMod.vr = newVal
       }
     },
-    ebaId: {
+    stateId: {
       get() {
-        return this.data.vrMain?.eba_id
+        return this.mainForm?.state_id ?? 0
       },
-      set(val) {
-        this.data.vrMain.eba_id = val
+      set(newVal) {
+        if (this.mainForm) {
+          this.mainForm.state_id = newVal
+        }
       }
     },
-    vrDate: {
+    readOnly: {
+      // getter
       get() {
-        return this.data.vr?.date
+        return 1 === this.stateStore.find((obj) => obj.id === this.stateId)?.read_only
       }
+    },
+    id() {
+      return this.servMod?.vr?.id ?? 0
     }
   },
   watch: {
-    ebaId: {
-      handler(val) {
-        if (!this.readOnly) {
-          this.data.vrMain.emp_id = this.getOptField('eba', 'emp_id', val)
-          const ebaNote = this.getOptField('eba', 'note', val)
-          if (ebaNote) {
-            this.msgInfo(ebaNote)
-          }
-        }
-      }
-      // immediate: true
-    },
-    vrDate: {
-      handler(val) {
-        if (val && !this.readOnly) {
-          let date = new Date()
-          date.setDate(erp.getDateByStr(val).getDate() + 1)
-          this.data.vrMain.tran_date = erp.formatDate(date, 'yyyyMMdd')
-        }
-      }
-      // immediate: true
-    }
-  },
-  created() {},
-  methods: {
-    initNewData() {
-      if (!this.data.vr) {
-        let v = {}
-        for (const item of this.desc.vr.items) {
-          v[item.name] = null
-        }
-        this.data.vr = v
-      }
-      if (!this.data.vrMain) {
-        let v = {}
-        for (const item of this.desc.vrMain.items) {
-          v[item.name] = null
-        }
-        this.data.vrMain = v
-      }
-      if (!this.data.vrNum) {
-        let row = {}
-        for (const item of this.desc.vrNum.items) {
-          row[item.name] = null
-        }
-        row['id'] = 1
-        this.data.vrNum = [row]
-      }
-      if (!this.data.vrPf) {
-        this.data.vrPf = []
-      }
-    },
-    getData() {
-      this.api.getByID(this.dataType, this.id).then((response) => {
-        if (response.code === 200) {
-          this.nextId = response.data.nextID
-          this.preId = response.data.preID
-          this.data = response.data
-          if (!this.readOnly) {
-            this.initNewData()
+    id: {
+      async handler(val, oldVal) {
+        if (oldVal===undefined)
+        console.log('watchid', val, oldVal)
+        let { code, msg, mod } = await this.serv.loadData(this.type, val)
+        if (code === 200) {
+          this.servMod = mod
+          this.readOnly || this.readyDataForEdit()
+          if (msg && msg !== '') {
+            this.msgSuccess(msg)
           }
         } else {
           this.msgError(response.msg)
         }
-      })
+      },
+      immediate: true
     },
-    onInput(e) {
-      console.log(e)
+    readOnly: {
+      handler(val) {
+        if (!val) {
+          this.readyDataForEdit()
+        }
+      }
+    }
+  },
+  methods: {
+    readyDataForEdit() {
+      let mod = this.servMod
+      const desc = this.desc
+      for (const key in desc) {
+        if (typeof desc[key] !== 'object') {
+          continue
+        }
+        if (!mod[key] || Object.keys(mod[key]).length === 0) {
+          const tp = Object.prototype.toString.call(mod[key])
+          if (tp === '[object Object]') {
+            desc[key].items.forEach((item) => {
+              this.$set(mod[key], item.name, null)
+            })
+          } else if (tp === '[object Array]') {
+            let obj = {}
+            desc[key].items.forEach((item) => {
+              obj[item.name] = null
+            })
+            obj.id = 1
+            mod[key].push(obj)
+          }
+        }
+      }
+
+      console.log(this.servMod)
     }
   }
 }

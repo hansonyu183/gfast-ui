@@ -72,7 +72,8 @@ export default {
     pf: {
       type: Array
     },
-    hasPf: false
+    hasPf: false,
+    ebaID:0,
   },
   data() {
     return {}
@@ -81,10 +82,19 @@ export default {
 
   computed: {
     ...mapGetters({
-      getOptField: 'getOptField',
-      getOptLabel: 'getOptLabel'
+      getOpt: 'getOpt'
       // ...
     }),
+    resList: {
+      get() {
+        return this.getOpt('res')
+      }
+    },
+    ebaBomList: {
+      get() {
+        return this.getOpt('eba_bom').find((obj) => obj.eba_id === this.ebaID)
+      }
+    },
     sum: {
       get: function () {
         BigNumber.config({ DECIMAL_PLACES: 4 })
@@ -149,8 +159,15 @@ export default {
           this.changeMain()
           break
         case 'res_id':
-          e.row.print_res = this.getOptLabel('res', e.row.res_id)
-          e.row.print_model = this.getOptField('res', 'model', e.row.res_id)
+          const res = this.resList.find((obj) => obj.id === e.row.res_id)
+          e.row.print_res = res.name
+          e.row.print_model = res.model
+          e.row.per_pack_num = res.pack_num
+          if (res.reskind_id=2) {
+            
+          } else {
+            
+          }
           break
         default:
           break

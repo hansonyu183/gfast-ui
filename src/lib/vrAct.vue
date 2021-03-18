@@ -61,7 +61,6 @@
 <script>
 import mxAct from './minxis/mxAct'
 import { mapGetters } from 'vuex'
-import { number } from 'echarts/lib/export'
 
 export default {
   name: 'VrAct',

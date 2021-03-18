@@ -33,7 +33,11 @@ export default {
     },
 
     state: function () {
-      return this.stateStore.find((obj) => obj.id == this.stateId)
+      let stateId=this.stateId
+      if(stateId===undefined || stateId===null){
+        stateId=0
+      }
+      return this.stateStore.find((obj) => obj.id == stateId)
     },
     nextAct: function () {
       const act = this.act.find((obj) => obj.id == this.state?.next_act_id)

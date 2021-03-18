@@ -19,8 +19,11 @@
       :prop="item.name"
       :label="item.label"
     >
-      <template v-slot="scope" >
-        <el-form-item :prop="`vrPf[${getPropIndex(scope.row)}].${item.name}`" :rules="formRules[item.type]">
+      <template v-slot="scope">
+        <el-form-item
+          :prop="`vrPf[${getPropIndex(scope.row)}].${item.name}`"
+          :rules="formRules[item.type]"
+        >
           <erp-input
             class="tb-input"
             :itemDesc="item"
@@ -38,6 +41,7 @@
 import ErpInput from './input/erpInput.vue'
 import MxTable from './minxis/mxTable'
 import { BigNumber } from 'bignumber.js'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'PfTable',
@@ -60,6 +64,10 @@ export default {
     }
   },
   computed: {
+    ...mapGetters({
+      getOpt: 'getOpt'
+      // ...
+    }),
     tableData: {
       get() {
         return this.value?.filter((pItem) => {
@@ -147,6 +155,10 @@ export default {
         case 'amo':
           e.row.price = new BigNumber(e.row.amo).div(e.row.num).toNumber()
           this.changeMain()
+          break
+        case 'res_id':
+          const res = this.getOpt('res').find((obj) => obj.id === e.row.res_id)
+          e.row.per_pack_num = res.pack_num
           break
         default:
           break

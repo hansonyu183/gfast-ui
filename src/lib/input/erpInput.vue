@@ -5,6 +5,18 @@
     v-bind="$attrs"
     v-on="$listeners"
   />
+  <dict-select
+    v-else-if="itemDesc.type === 'dict'"
+    :prop="itemDesc.name"
+    v-bind="$attrs"
+    v-on="$listeners"
+  />
+  <sq-price-select
+    v-else-if="itemDesc.type === 'sqPrice'"
+    :prop="itemDesc.name"
+    v-bind="$attrs"
+    v-on="$listeners"
+  />
   <eba-select
     v-else-if="itemDesc.type === 'eba'"
     :prop="itemDesc.name"
@@ -39,7 +51,7 @@
   <el-input v-else-if="itemDesc.type === 'unum'" v-bind="$attrs" v-on="$listeners" />
   <el-input v-else-if="itemDesc.type === 'uamo'" v-bind="$attrs" v-on="$listeners" />
 
-  <el-input v-else v-bind="$attrs" v-on="$listeners" />
+  <el-input v-else :validate-event="false" v-bind="$attrs" v-on="$listeners" />
 </template>
 
 <script>
@@ -52,13 +64,17 @@
   ></num-input>*/
 import DocSelect from './docSelect'
 import EbaSelect from './ebaSelect'
+import DictSelect from './dictSelect'
+import SqPriceSelect from './sqPriceSelect'
 
 //import NumInput from './input/numInput'
 export default {
   name: 'ErpInput',
   components: {
     DocSelect,
-    EbaSelect
+    EbaSelect,
+    DictSelect,
+    SqPriceSelect
   },
   props: {
     itemDesc: {
@@ -71,7 +87,7 @@ export default {
           type: 'string'
         }
       }
-    },
+    }
   },
   methods: {
     focus() {
@@ -81,7 +97,7 @@ export default {
     },
     onInput(e) {
       console.log('input', e, this.$attrs.value)
-       this.$attrs.value=e
+      this.$attrs.value = e
       this.$emit('input', e)
     }
   }

@@ -6,18 +6,10 @@ import printJS from 'print-js'
 export default {
   name: 'MxEditor',
   props: {
-    desc: {},
-    dataType: '',
-    dataId: 0,
     printCss: ''
   },
   data() {
     return {
-      id: this.dataId,
-      nextId: 0,
-      preId: 0,
-      data: {},
-      api: {},
       printObj: {
         printable: 'print',
         type: 'html',
@@ -40,43 +32,7 @@ export default {
       }
     }
   },
-  computed: {
-    ...mapGetters({
-      stateStore: 'state'
-      // ...
-    }),
-    mainForm: {},
-    stateId: {
-      get: function () {
-        return this.mainForm?.state_id ?? 0
-      },
-      set: function (newVal) {
-        if (this.mainForm) {
-          this.mainForm.state_id = newVal
-        }
-      }
-    },
-    readOnly: {
-      // getter
-      get: function () {
-        return 1 === this.stateStore.find((obj) => obj.id === this.stateId)?.read_only
-      }
-    }
-  },
-  watch: {
-    dataId: {
-      handler(nval) {
-        this.id = nval
-      }
-    },
-    id: {
-      handler() {
-        this.getData()
-      },
-      immediate: true
-    }
-  },
-
+ 
   methods: {
     /** 查询明细数据 */
     getData() {
