@@ -1,5 +1,5 @@
 <template>
-  <el-select ref="elselect" clearable default-first-option  v-bind="$attrs" v-on="$listeners">
+  <el-select ref="elselect" clearable default-first-option v-bind="$attrs" v-on="$listeners">
     <el-option
       v-for="item in sqOption"
       :key="item.dictCode"

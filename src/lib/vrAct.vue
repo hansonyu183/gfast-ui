@@ -76,7 +76,7 @@ export default {
     ...mapGetters({
       auth: 'authVr'
       // ...
-    }),
+    })
   },
   watch: {},
   created() {},

@@ -2,7 +2,7 @@
   <vr-ba-editor
     ref="editor"
     type="BA"
-    :serv="serv"
+    :server="serv"
     :dataId="0"
     :desc="pageDesc"
     printCss="./print/vr_ba.css"
@@ -12,8 +12,9 @@
 
 <script>
 import VrBaEditor from './components/vrBaEditor.vue'
-import { server } from './serv/baServ.js'
+import { ServerBA } from '../model'
 import Page from '../page'
+
 export default {
   name: 'BaEditor',
   components: {
@@ -21,9 +22,10 @@ export default {
   },
   mixins: [Page],
   computed: {
-    serv: () => server
+    serv() {
+      return ServerBA
+    }
   },
-
   data() {
     return {
       pageName: 'baEditor',
@@ -152,7 +154,8 @@ export default {
             {
               label: '参考价',
               name: 'guide_price',
-              type: 'price'
+              type: 'price',
+              readOnly: true
             }
           ],
           vrPf: {
@@ -193,7 +196,8 @@ export default {
               {
                 label: '参考价',
                 name: 'guide_price',
-                type: 'price'
+                type: 'price',
+                readOnly: true
               }
             ]
           }
@@ -201,7 +205,6 @@ export default {
       }
     }
   },
-
-  methods: {}
+  mounted() {}
 }
 </script>

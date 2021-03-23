@@ -8,7 +8,7 @@ export default {
       type: Array
     },
     mainProp: '',
-    expandProp:'',
+    expandProp: '',
     formRules: {},
     readOnly: false,
     showSave: false
@@ -53,19 +53,41 @@ export default {
       this.$emit('saveTable', this.desc.name)
     },
     addRow() {
-      let newRow = {}
-      for (const item of this.desc.items) {
-        newRow[item.name] = null
-      }
+      /*let newRow = {}
+      let list = this.tableData
       let maxId = 0
-      if (this.tableData.length > 0) {
-        maxId = this.tableData.reduce(function (pre, cur) {
-          return Math.max(cur.id, pre)
-        }, 0)
-      }
-      const newID = maxId + 1
-      newRow['id'] = newID
       this.tableData.push(newRow)
+      if (list === 0) {
+        list = this.desc.items
+        for (const item of list) {
+          this.$set(newRow, item.name, null)
+        }
+      } else {
+        maxId = list.reduce((pre, cur) =>{
+          return Math.max(Number(cur.id), pre)
+        }, 0)
+        console.log(list)
+        for (const key in list[0]) {
+          if (typeof list[0][key] === 'object') {
+            /* const item = list[0][key]
+            let sub
+            for (const ik in item) {
+              this.$set(newRow,item.name,null)
+
+              sub[key][ik] = null
+            }
+            sub['id'] = 1
+            if (Object.hasOwnProperty.call(item, 'iid')) {
+              sub['iid'] = maxId + 1
+            }
+          } else {
+            this.$set(newRow, key, null)
+          }
+        }
+      }
+      this.$set(newRow, 'id', maxId + 1)
+      //list.push(newRow)*/
+       this.tableData.push({})
     },
     delRow(index) {
       if (this.tableData.length > 1) {

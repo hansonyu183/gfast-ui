@@ -41,20 +41,20 @@ export default {
     },
     nextAct: function () {
       const act = this.act.find((obj) => obj.id == this.state?.next_act_id)
-      if (!act || this.authAct.act_ids === '*') {
+      if (!act || this.authAct?.act_ids === '*') {
         return act
       }
-      if (this.authAct.act_ids.indexOf(act.id) === -1) {
+      if (this.authAct?.act_ids.indexOf(act.id) === -1) {
         return null
       }
       return act
     },
     unAct: function () {
       const act = this.act.find((obj) => obj.id == this.state?.un_act_id)
-      if (!act || this.authAct.act_ids === '*') {
+      if (!act || this.authAct?.act_ids === '*') {
         return act
       }
-      if (this.authAct.act_ids.indexOf(act.id) === -1) {
+      if (this.authAct?.act_ids.indexOf(act.id) === -1) {
         return null
       }
       return act
@@ -65,10 +65,10 @@ export default {
         return []
       }
       let authCandoIds = []
-      if (this.authAct.act_ids === '*') {
+      if (this.authAct?.act_ids === '*') {
         authCandoIds = candoIds
       } else {
-        authCandoIds = candoIds.filter((id) => this.authAct.act_ids.indexOf(id) !== -1)
+        authCandoIds = candoIds.filter((id) => this.authAct?.act_ids.indexOf(id) !== -1)
       }
       let acts = []
       this.act.filter((v) => {

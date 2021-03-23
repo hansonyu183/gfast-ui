@@ -23,8 +23,8 @@ router.beforeEach((to, from, next) => {
           // 拉取user_info
           const roles = res.data.roles
           store.dispatch('GenerateRoutes', { roles }).then(accessRoutes => {
-          // 测试 默认静态页面
-          // store.dispatch('permission/generateRoutes', { roles }).then(accessRoutes => {
+            // 测试 默认静态页面
+            // store.dispatch('permission/generateRoutes', { roles }).then(accessRoutes => {
             // 根据roles权限生成可访问的路由表
             router.addRoutes(accessRoutes) // 动态添加可访问路由表
             next({ ...to, replace: true }) // hack方法 确保addRoutes已完成
@@ -36,6 +36,7 @@ router.beforeEach((to, from, next) => {
               next({ path: '/' })
             })
           })
+        loadErp()
       } else {
         next()
         // 没有动态改变权限的需求可直接next() 删除下方权限判断 ↓
@@ -52,6 +53,8 @@ router.beforeEach((to, from, next) => {
     if (whiteList.indexOf(to.path) !== -1) {
       // 在免登录白名单，直接进入
       next()
+      console.log('没有token', store.getters.name)
+
     } else {
       next(`/login?redirect=${to.path}`) // 否则全部重定向到登录页
       NProgress.done()
@@ -62,3 +65,13 @@ router.beforeEach((to, from, next) => {
 router.afterEach(() => {
   NProgress.done()
 })
+
+async function loadErp() {
+  try {
+    store.dispatch('ui/loadALLOpt')
+    store.dispatch('ui/loadAuth')
+    store.dispatch('ui/loadDict')
+  } catch (e) {
+    console.log(e)
+  }
+}

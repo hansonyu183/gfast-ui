@@ -1,6 +1,6 @@
 <script>
 import { mapGetters } from 'vuex'
-import { deepTrimNull } from '@/utils/erp.js'
+import { deepTrimNull } from '@/lib/utils'
 import printJS from 'print-js'
 
 export default {
@@ -28,8 +28,8 @@ export default {
       rules: {
         name: [{ required: true, message: '不能为空', trigger: [] }],
         no: [{ required: true, message: '不能为空', trigger: [] }],
-        docKey: [{ required: true, message: '不能为空', trigger: [ ] }],
-        eba: [{ required: true, message: '不能为空', trigger: [ ] }],
+        docKey: [{ required: true, message: '不能为空', trigger: [] }],
+        eba: [{ required: true, message: '不能为空', trigger: [] }],
         unum: [
           {
             pattern: /^(0\.?\d{0,4}|[1-9]\d*\.?\d{0,4})$/,

@@ -1,14 +1,21 @@
 <template>
-  <el-form :model="servMod" ref="editorForm" id="print" label-width="80px" :inline="true">
+  <el-form
+    v-if="model"
+    :model="model"
+    ref="editorForm"
+    id="print"
+    label-width="80px"
+    :inline="true"
+  >
     <vr-act
-      v-if="servMod.vr"
+      v-if="model.vr"
       v-bind="$attrs"
       v-on="$listeners"
-      :id.sync="servMod.vr.id"
-      :nextId="servMod.nextId"
-      :preId="servMod.preId"
+      :id.sync="model.vr.id"
+      :nextId="model.nextId"
+      :preId="model.preId"
       :stateId="stateId"
-      :dataType="servMod.type"
+      :dataType="model.type"
     >
       <el-form-item
         v-for="item in desc.vr.items"
@@ -20,28 +27,30 @@
         <erp-input
           :class="`vr_${item.name}`"
           :itemDesc="item"
-          v-model.lazy="servMod.vr[item.name]"
+          :disabled="readOnly"
+          v-model.lazy="model.vr[item.name]"
         />
       </el-form-item>
     </vr-act>
-    <div v-if="servMod.vrMain">
+    <div v-if="model.vrMain">
       <el-form-item
         v-for="item in desc.vrMain.items"
         :key="item.name"
         :prop="`vrMain.${item.name}`"
         :label="item.label"
         :show-message="true"
-        v-model.lazy="servMod.vrMain[item.name]"
+        v-model="model.vrMain[item.name]"
       >
         <erp-input
           :class="`vr_main_${item.name}`"
           :itemDesc="item"
-          v-model.lazy="servMod.vrMain[item.name]"
+          :disabled="readOnly"
+          v-model="model.vrMain[item.name]"
         />
       </el-form-item>
     </div>
     <res-table
-      v-if="servMod.vrNum"
+      v-if="model.vrNum && model.vrMain && model.vrMain.eba_id"
       class="vr-num"
       ref="vrNum"
       mainProp="vrNum"
@@ -49,7 +58,7 @@
       show-summary
       :formRules="rules"
       :desc="desc.vrNum"
-      v-model.lazy="servMod.vrNum"
+      v-model="model.vrNum"
       :readOnly="readOnly"
     >
     </res-table>
@@ -62,7 +71,6 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import * as erp from '@/utils/erp.js'
 
 import MxEditor from './mxEditor.vue'
 import ResTable from './resTable'
@@ -77,13 +85,13 @@ export default {
   },
   mixins: [MxEditor],
   props: {
-    serv: {},
+    server: {},
     desc: {},
     type: ''
   },
   data() {
     return {
-      servMod: {}
+      model: {}
     }
   },
   computed: {
@@ -93,10 +101,10 @@ export default {
     }),
     mainForm: {
       get() {
-        return this.servMod.vr
+        return this.model.vr
       },
       set(newVal) {
-        this.servMod.vr = newVal
+        this.model.vr = newVal
       }
     },
     stateId: {
@@ -116,63 +124,32 @@ export default {
       }
     },
     id() {
-      return this.servMod?.vr?.id ?? 0
+      return this.model?.vr?.id ?? 0
     }
   },
   watch: {
     id: {
       async handler(val, oldVal) {
-        if (oldVal===undefined)
-        console.log('watchid', val, oldVal)
-        let { code, msg, mod } = await this.serv.loadData(this.type, val)
-        if (code === 200) {
-          this.servMod = mod
-          this.readOnly || this.readyDataForEdit()
+        let { code, msg, model } = await this.server.createModel(this.type, val)
+        if (code === 200) {          
+          this.model = model
           if (msg && msg !== '') {
             this.msgSuccess(msg)
           }
         } else {
-          this.msgError(response.msg)
+          this.msgError(msg)
         }
       },
       immediate: true
     },
     readOnly: {
       handler(val) {
-        if (!val) {
-          this.readyDataForEdit()
-        }
+        this.model.readOnly = val
       }
     }
   },
-  methods: {
-    readyDataForEdit() {
-      let mod = this.servMod
-      const desc = this.desc
-      for (const key in desc) {
-        if (typeof desc[key] !== 'object') {
-          continue
-        }
-        if (!mod[key] || Object.keys(mod[key]).length === 0) {
-          const tp = Object.prototype.toString.call(mod[key])
-          if (tp === '[object Object]') {
-            desc[key].items.forEach((item) => {
-              this.$set(mod[key], item.name, null)
-            })
-          } else if (tp === '[object Array]') {
-            let obj = {}
-            desc[key].items.forEach((item) => {
-              obj[item.name] = null
-            })
-            obj.id = 1
-            mod[key].push(obj)
-          }
-        }
-      }
-
-      console.log(this.servMod)
-    }
-  }
+  methods: {},
+  mounted() {}
 }
 </script>
 

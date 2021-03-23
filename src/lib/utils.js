@@ -38,6 +38,23 @@ export function getDateByStr(str) {
     return myDate
 }
 
+export function addDate(dateStr, days) {
+    let date = getDateByStr(dateStr);
+
+    date.setDate(date.getDate() + days);
+
+    let m = date.getMonth() ;
+    let d = date.getDate()
+    if (m < 10) {
+        m = '0' + m
+    }
+    if (d < 10) {
+        d = '0' + d
+    }
+
+    return date.getFullYear() + m + d;
+}
+
 export function deepTrimNull(obj) {
     for (const t in obj) {
         const tp = Object.prototype.toString.call(obj[t])

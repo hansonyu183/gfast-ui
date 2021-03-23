@@ -20,7 +20,6 @@ import { getDicts } from "@/api/system/dict/data";
 import { getConfigKey } from "@/api/system/config";
 import { parseTime, resetForm, addDateRange, selectDictLabel, download, handleTree } from "@/utils/ruoyi";
 import Pagination from "@/components/Pagination";
-import 'xe-utils'
 
 // 全局方法挂载
 Vue.prototype.getDicts = getDicts
@@ -71,16 +70,8 @@ let vueThis=new Vue({
   router,
   store,
   render: h => h(App),
-  created: async function () {
-    try {
-      await this.$store.dispatch('ui/loadALLOpt')
-      await this.$store.dispatch('ui/loadAuth')
-      await this.$store.dispatch('ui/loadDict')
-      await this.$store.dispatch('desc/loadLabel')
-      //await this.$store.dispatch('desc/loadUser', 'admin')
-    } catch (e) {
-      console.log(e)
-    }
+  created: function () {
+
   }
 })
 

@@ -35,7 +35,7 @@
 <script>
 import PY from '@/utils/c2py.js'
 import docApi from '@/api/erp/doc'
-import { deepTrimNull } from '@/utils/erp.js'
+import { deepTrimNull } from '@/lib/utils'
 
 import MxEditor from '@/lib/minxis/mxEditor.vue'
 import EditForm from '@/lib/editForm.vue'

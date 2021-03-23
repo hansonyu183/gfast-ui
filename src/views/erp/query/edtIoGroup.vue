@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import * as erp from "@/utils/erp";
+import * as erp from "../../../lib/utils";
 import ErpQuery from "./components/erpQuery.vue";
 export default {
   name: "QueryEdtIoGroup",

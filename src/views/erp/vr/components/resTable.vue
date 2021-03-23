@@ -44,7 +44,7 @@
           <erp-input
             class="tb-input"
             :itemDesc="item"
-            :disabled="item.readOnly ? item.readOnly && readOnly : readOnly"
+            :disabled="disableItem(item)"
             v-model="scope.row[scope.column.property]"
             @keyup.ctrl.native="onKeyUp($event, colIndex, scope.$index, scope.row)"
           />
@@ -54,11 +54,6 @@
   </el-table>
 </template>
 <script>
-/*
-     
-
-
- */
 import ErpInput from '@/lib/input/erpInput.vue'
 import MxTable from './mxTable.vue'
 import { mapGetters } from 'vuex'
@@ -84,6 +79,13 @@ export default {
       if (this.tableData.length > 1) {
         this.tableData.splice(index, 1)
       }
+    },
+    disableItem(itemDesc) {
+      const disable = this.readOnly
+      if (disable) {
+        return true
+      }
+      return itemDesc.readOnly ? itemDesc.readOnly : disable
     },
     getSummaries(param) {
       const { columns, data } = param

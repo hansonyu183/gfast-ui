@@ -1,6 +1,6 @@
 <script>
 import { mapGetters } from 'vuex'
-import { deepTrimNull } from '@/utils/erp.js'
+import { deepTrimNull } from '@/lib/utils'
 import printJS from 'print-js'
 
 export default {

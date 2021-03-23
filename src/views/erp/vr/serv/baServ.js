@@ -1,10 +1,9 @@
-//store.js
-import Vue from '@/main'
+/*//store.js
 import vrApi from '@/api/erp/vr'
 import { optApi } from '@/api/erp/ui'
 
 import store from '@/store'
-import * as erp from '@/utils/erp.js'
+import * as erp from '../utils'
 import { BigNumber } from 'bignumber.js'
 BigNumber.config({ DECIMAL_PLACES: 4 })
 
@@ -46,17 +45,21 @@ const recountVrPf = throttle((vrNum) => {
   let pfList = vrNum.vrPf
   let sumPerPckNum = new BigNumber(0)
   let sumNum = new BigNumber(0)
+  let sumGuideAmo = new BigNumber(0)
   for (const item of pfList) {
     sumNum = sumNum.plus(item.num ?? 0)
     sumPerPckNum = sumPerPckNum.plus(item.per_pack_num ?? 0)
+    const gAmo = new BigNumber(item.per_pack_num).times(item.guide_price)
+    sumGuideAmo = sumGuideAmo.plus(gAmo)
   }
   for (const i in pfList) {
     // pf[i].per_pack_num = new BigNumber(vrNum.per_pack_num).times(pf[i].per_pack_num).div(sumPerPckNum).toNumber()
     let pf = pfList[i][IDENTITY]
     const rate = new BigNumber(pf.per_pack_num).div(sumPerPckNum)
+    const guideRate = new BigNumber(pf.per_pack_num).times(pf.guide_price).div(sumGuideAmo)
     const newPerPackNum = new BigNumber(vrNum.per_pack_num).times(rate)
     const newNum = new BigNumber(vrNum.num).times(rate)
-    const newAmo = new BigNumber(vrNum.amo).times(rate)
+    const newAmo = new BigNumber(vrNum.amo).times(guideRate)
     const newPrice = newAmo.div(newNum)
     pf.per_pack_num = newPerPackNum.toNumber()
     pf.num = newNum.toNumber()
@@ -67,28 +70,30 @@ const recountVrPf = throttle((vrNum) => {
 }, 300)
 
 const vrPfSumToVrNum = throttle((vrNum, root) => {
-  let amo = new BigNumber(0)
-  let perPackNum = new BigNumber(0)
-  let num = new BigNumber(0)
+  let sumAmo = new BigNumber(0)
+  let sumGuideAmo = new BigNumber(0)
+  let sumPerPackNum = new BigNumber(0)
+  let sumNum = new BigNumber(0)
   for (const item of vrNum.vrPf) {
-    amo = amo.plus(item.amo)
-    num = num.plus(item.num)
-    perPackNum = perPackNum.plus(item.per_pack_num)
+    sumAmo = sumAmo.plus(item.amo)
+    sumNum = sumNum.plus(item.num)
+    sumPerPackNum = sumPerPackNum.plus(item.per_pack_num)
+    const gAmo = new BigNumber(item.per_pack_num).times(item.guide_price)
+    sumGuideAmo = sumGuideAmo.plus(gAmo)
   }
-  vrNum.per_pack_num = perPackNum.toNumber()
-  vrNum.price = amo.div(num).toNumber()
-  vrNum.num = num.toNumber()
-  vrNum.amo = amo.toNumber()
+  vrNum.per_pack_num = sumPerPackNum.toNumber()
+  vrNum.price = sumAmo.div(sumNum).toNumber()
+  vrNum.guide_price = sumGuideAmo.div(sumPerPackNum).toNumber()
+  vrNum.num = sumNum.toNumber()
+  vrNum.amo = sumAmo.toNumber()
   vrNumSumToMain(root.vrNum, root.vrMain)
 }, 300)
 
 const makeBomPf = (bomList, mainRes) => {
   let i = 0
   let sumPack = 0
-  let sumAmo = new BigNumber(0)
   let vrPf = []
   for (const item of bomList) {
-    const guidePrice = 0
     const bomNum = new BigNumber(mainRes.pack_num).times(item.per_pack_num).toNumber()
     sumPack = new BigNumber(sumPack).plus(item.per_pack_num).toNumber()
     let pf = {
@@ -97,24 +102,22 @@ const makeBomPf = (bomList, mainRes) => {
       res_id: item.bom_res_id,
       per_pack_num: item.per_pack_num ?? 1,
       num: bomNum,
-      price: guidePrice,
-      amo: new BigNumber(bomNum).times(guidePrice).toNumber(),
+      price: 0,
+      amo: 0,
+      guide_price: 0
     }
     vrPf.push(pf)
     i++
-    updateGuidePrice(pf)
-    const amo = new BigNumber(pf.per_pack_num).times(pf.guide_price)
-    sumAmo = sumAmo.plus(amo)
   }
-  const sumPrice = sumAmo.div(sumPack).toNumber()
   return {
-    vrPf, sumPack, sumPrice
+    vrPf, sumPack
   }
 }
 
 const updateGuidePrice = async (row) => {
   const resp = await optApi.getByNameAndID('res', row.res_id)
   row.guide_price = resp.data.guide_price
+  row.price = resp.data.guide_price
 }
 
 let afterSet = {
@@ -146,30 +149,26 @@ let afterSet = {
     },
     amo: (p) => {
       p.target.price = new BigNumber(p.value).div(p.target.num).toNumber()
-      vrNumSumToMain(p.parent, p.root.vrMain)
+      recountVrPf(p.target)
     },
     pack_num: async (p) => {
       p.target.num = new BigNumber(p.value).times(p.target.per_pack_num).toNumber()
       p.target.amo = new BigNumber(p.target.price).times(p.target.num).toNumber()
       recountVrPf(p.target)
-      vrNumSumToMain(p.parent, p.root.vrMain)
     },
     per_pack_num: (p) => {
       p.target.num = new BigNumber(p.target.pack_num).times(p.value).toNumber()
       p.target.amo = new BigNumber(p.target.price).times(p.target.num).toNumber()
       recountVrPf(p.target)
-      vrNumSumToMain(p.parent, p.root.vrMain)
     },
     num: (p) => {
       p.target.per_pack_num = new BigNumber(p.value).div(p.target.pack_num).toNumber()
       p.target.amo = new BigNumber(p.target.price).times(p.value).toNumber()
       recountVrPf(p.target)
-      vrNumSumToMain(p.parent, p.root.vrMain)
     },
     price: (p) => {
       p.target.amo = new BigNumber(p.value).times(p.target.num).toNumber()
       recountVrPf(p.target)
-      vrNumSumToMain(p.parent, p.root.vrMain)
     },
     res_id: (p) => {
       if (!p.value || p.value === p.oldVal) {
@@ -185,7 +184,6 @@ let afterSet = {
         let bomList = ebaBomList.filter((obj) => obj.res_id === p.value && obj.eba_id === p.root.vrMain.eba_id)
         pfList = makeBomPf(bomList, p.target)
       } else if (res.reskind_id === 4) {
-        const guidePrice = 0
         const bomNum = new BigNumber(p.target.pack_num).times(res.per_pack_num).toNumber()
         let pf = {
           id: 1,
@@ -193,20 +191,20 @@ let afterSet = {
           res_id: p.value,
           per_pack_num: res.per_pack_num ?? 1,
           num: bomNum,
-          price: guidePrice,
-          amo: new BigNumber(bomNum).times(guidePrice).toNumber(),
+          price: 0,
+          amo: 0,
           guide_price: 0
         }
         pfList.vrPf = [pf]
         pfList.sumPack = res.per_pack_num
-        updateGuidePrice(pf)
-        pfList.sumPrice = pf.guide_price
       }
       p.receiver.vrPf = pfList.vrPf ?? []
       p.target.print_res = res.name
       p.target.print_model = res.model
       p.target.per_pack_num = pfList.sumPack ?? 0
-      p.target.guide_price = pfList.sumPrice
+      for (const i in p.receiver.vrPf) {
+        updateGuidePrice(p.receiver.vrPf[i])
+      }
       //updateGuidePrice(p.receiver)
       //console.log(p.target.vrPf)
     }
@@ -222,13 +220,11 @@ let afterSet = {
       vrPfSumToVrNum(p.parent, p.root)
     },
     per_pack_num: (p) => {
-      console.log(p)
       p.target.num = new BigNumber(p.parent.pack_num).times(p.value).toNumber()
       p.target.amo = new BigNumber(p.target.price).times(p.target.num).toNumber()
       vrPfSumToVrNum(p.parent, p.root)
     },
     num: (p) => {
-      console.log('setPFnum', p)
       p.target.per_pack_num = new BigNumber(p.value).div(p.parent.pack_num).toNumber()
       p.target.amo = new BigNumber(p.target.price).times(p.value).toNumber()
       vrPfSumToVrNum(p.parent, p.root)
@@ -239,6 +235,15 @@ let afterSet = {
     },
     res_id: (p) => {
       updateGuidePrice(p.receiver)
+    },
+    guide_price: (p) => {
+      console.log('guide_price', p)
+      let sumAmo = new BigNumber(0)
+      for (const item of p.parent.vrPf) {
+        const amo = new BigNumber(item.per_pack_num).times(item.guide_price)
+        sumAmo = sumAmo.plus(amo)
+      }
+      p.parent.guide_price = sumAmo.div(p.parent.per_pack_num).toNumber()
     }
   }
 }
@@ -258,15 +263,11 @@ function deepProxy(obj, key, path, root, parent) {
       const oldVal = target[property]
       const tarTp = Object.prototype.toString.call(target)
       if (tarTp === '[object Array]') {
-        console.log('setArray', path, property, key, value, oldVal, parent)
-
         value = deepProxy(value, property, path, root, parent)
       } else if (tarTp === '[object Object]') {
         value = deepProxy(value, property, property, root, target)
       }
       const r = Reflect.set(target, property, value, receiver)
-
-      console.log('aftset', path, property, key, value, oldVal, target, parent)
       if (r && property !== '__proto__' && afterSet[path] && afterSet[path][property]) {
         afterSet[path][property]({ root, parent, target, key, value, oldVal, receiver })
       }
@@ -308,4 +309,4 @@ export let server = {
     return { code: response.code, msg: response.msg, mod: model }
   }
 }
-//export let observableMod = Vue.observable(proxyMod);
+//export let observableMod = Vue.observable(proxyMod);*/

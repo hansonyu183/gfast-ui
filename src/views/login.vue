@@ -98,7 +98,7 @@ export default {
     async loadErpState() {
       try {
         await this.$store.dispatch('ui/loadAuth')
-        await this.$store.dispatch('desc/loadLabel')
+       // await this.$store.dispatch('desc/loadLabel')
       } catch (e) {
         console.log(e)
       }
@@ -110,6 +110,8 @@ export default {
       })
     },
     getCookie() {
+            console.log('Cookies')
+
       const username = Cookies.get('username')
       const password = Cookies.get('password')
       const rememberMe = Cookies.get('rememberMe')

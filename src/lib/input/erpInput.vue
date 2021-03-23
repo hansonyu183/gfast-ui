@@ -46,7 +46,6 @@
     v-else-if="itemDesc.type === 'amo'"
     v-bind="$attrs"
     v-on="$listeners"
-    @input="onInput"
   />
   <el-input v-else-if="itemDesc.type === 'unum'" v-bind="$attrs" v-on="$listeners" />
   <el-input v-else-if="itemDesc.type === 'uamo'" v-bind="$attrs" v-on="$listeners" />
@@ -95,11 +94,6 @@ export default {
         this.$children[0].focus()
       }
     },
-    onInput(e) {
-      console.log('input', e, this.$attrs.value)
-      this.$attrs.value = e
-      this.$emit('input', e)
-    }
   }
 }
 </script>

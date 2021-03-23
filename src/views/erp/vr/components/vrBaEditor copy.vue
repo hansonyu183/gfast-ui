@@ -1,6 +1,5 @@
 <template>
   <el-form :model="data" ref="editorForm" id="print" label-width="80px" :inline="true">
-    
     <vr-act
       v-bind="$attrs"
       v-on="$listeners"
@@ -59,9 +58,8 @@
 </template>
 
 <script>
-import { BigNumber } from 'bignumber.js'
 import { mapGetters } from 'vuex'
-import * as erp from '@/utils/erp.js'
+import * as erp from '@/lib/utils'
 
 import vrApi from '@/api/erp/vr'
 
@@ -96,7 +94,7 @@ export default {
   computed: {
     ...mapGetters({
       sysUser: 'sysUser',
-      getOpt: 'getOpt',
+      getOpt: 'getOpt'
       // ...
     }),
     mainForm: {
